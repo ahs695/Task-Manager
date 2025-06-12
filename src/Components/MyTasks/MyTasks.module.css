@@ -1,0 +1,80 @@
+.myTasks {
+  display: flex;
+  flex-direction: column;
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  gap: 20px;
+  padding-left: 20px;
+  padding-bottom: 50px;
+}
+
+.myTasksTop {
+  background-color: #d9f275;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  border-radius: 40px;
+}
+
+.taskOptions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.taskOption {
+  background-color: #201f32;
+  border: none;
+  padding: 10px 20px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border-radius: 20px;
+  color: aliceblue;
+  font-size: 16px;
+}
+
+.taskOption input {
+  width: 160px;
+  background: none;
+  border: none;
+  color: aliceblue;
+}
+
+.taskOption input::placeholder {
+  color: aliceblue;
+  font-size: 16px;
+}
+
+.myTasksTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.myTasksTable thead {
+  background-color: #201f32;
+  color: aliceblue;
+}
+
+.myTasksTable th {
+  color: aliceblue;
+  font-size: 20px;
+  padding: 16px 20px;
+  text-align: left;
+}
+
+.myTasksTable td {
+  padding: 16px 20px;
+  text-align: left;
+  font-size: 16px;
+  border-bottom: 1px solid white;
+  color: #201f32;
+  vertical-align: top;
+  border-bottom: 2px solid #201f32;
+}
+
+.myTasksTable tbody tr:nth-child(even) {
+  background-color: white;
+}

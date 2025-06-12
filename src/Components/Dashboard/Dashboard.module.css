@@ -1,0 +1,13 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.content {
+  background-color: aliceblue;
+  padding: 15px;
+  display: flex;
+  gap: 15px;
+  min-height: 550px;
+}
