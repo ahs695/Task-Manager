@@ -7,6 +7,7 @@ export default function Cards({
   inProgressCount,
   underReviewCount,
   completedCount,
+  delCount,
 }) {
   const chartOptions = {
     chart: {
@@ -23,7 +24,7 @@ export default function Cards({
     dataLabels: {
       enabled: false,
     },
-    colors: ["aliceblue"], // 🔹 line color
+    colors: ["aliceblue"],
     grid: {
       borderColor: "rgba(255, 255, 255, 0.1)", // optional: lighter grid
     },
@@ -43,34 +44,36 @@ export default function Cards({
         <h3>Overall Information</h3>
         <div className={styles.infoData}>
           <h2>
-            {toDoCount + inProgressCount + underReviewCount + completedCount}
+            {delCount +
+              toDoCount +
+              inProgressCount +
+              underReviewCount +
+              completedCount}
           </h2>
           <p>
             {" "}
-            Task done <br />
+            Task added <br />
             for all time
           </p>
           <p>-</p>
-          <h2>0</h2>
+          <h2>{delCount}</h2>
           <p>
             {" "}
             Projects <br />
-            are stoped
+            Deleted
           </p>
         </div>
         <progress value={0.5} />
         <div className={styles.stats}>
-          <div className={styles.stat} style={{ backgroundColor: "#A2FFE7" }}>
-            <img src="/process.png" alt="" />
-            <h2>
-              {toDoCount + inProgressCount + underReviewCount + completedCount}
-            </h2>
-            <p>Tasks</p>
-          </div>
           <div className={styles.stat} style={{ backgroundColor: "#B5E5FE" }}>
             <img src="/inprogress.png" alt="" />
             <h2>{inProgressCount}</h2>
             <p>In Progress</p>
+          </div>
+          <div className={styles.stat} style={{ backgroundColor: "#A2FFE7" }}>
+            <img src="/process.png" alt="" />
+            <h2>{underReviewCount}</h2>
+            <p>In Review</p>
           </div>
           <div className={styles.stat} style={{ backgroundColor: "#E1DEFF" }}>
             <img src="/completed.png" alt="" />

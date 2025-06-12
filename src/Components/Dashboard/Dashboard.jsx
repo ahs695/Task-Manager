@@ -4,6 +4,7 @@ import Info from "./DashInfo/Info";
 import { Routes, Route } from "react-router-dom";
 import Callender from "../Callender/Callender";
 import MyTasks from "../MyTasks/MyTasks";
+import Timeline from "../Timeline/Timeline";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -60,17 +61,8 @@ function Dashboard() {
           }
         />
         <Route path="callender" element={<Callender />} />
-        <Route
-          path="myTasks"
-          element={
-            <MyTasks
-              toDoTasks={toDoTasks}
-              inProgressTasks={inProgressTasks}
-              underReviewTasks={underReviewTasks}
-              completedTasks={completedTasks}
-            />
-          }
-        />
+        <Route path="myTasks" element={<MyTasks allTasks={allTasks} />} />
+        <Route path="timeline" element={<Timeline allTasks={allTasks} />} />
       </Routes>
     </div>
   );

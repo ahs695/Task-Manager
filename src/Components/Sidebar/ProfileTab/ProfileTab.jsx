@@ -14,10 +14,6 @@ export default function ProfileTab({ onClose }) {
   return (
     <div className={styles.profileOverlay} onClick={handleOverlayClick}>
       <div className={styles.profileSidebar} onClick={stopPropagation}>
-        <div className={styles.profileTop}>
-          <img src="/profile.png" alt="prof" />
-          <h2>Hadi</h2>
-        </div>
         <div className={styles.profileOptions}>
           <button>
             {" "}

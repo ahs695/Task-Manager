@@ -7,7 +7,7 @@ export default function Header() {
     <header className={styles.header}>
       <div className={styles.headerContainer}>
         <p className={styles.headerTitle}>
-          Divecho<span>Technologies</span>
+          DivEcho<span>Technologies</span>
         </p>
         <nav className={styles.nav}>
           <NavLink

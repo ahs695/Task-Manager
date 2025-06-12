@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const taskSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String },
-  label: { type: String }, // ✅ Added label
+  label: { type: String },
   priority: {
     type: String,
     enum: ["Low", "Mid", "High"],
@@ -16,12 +16,11 @@ const taskSchema = new mongoose.Schema({
   },
   creationTime: {
     type: Date,
-    default: () => {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // ✅ Zero out time
-      return today;
-    },
+    default: () => new Date(),
   },
+  startedTime: { type: Date, default: null }, // ✅ New
+  reviewTime: { type: Date, default: null }, // ✅ New
+  completionTime: { type: Date, default: null }, // ✅ Already added earlier
 });
 
 module.exports = mongoose.model("Task", taskSchema);

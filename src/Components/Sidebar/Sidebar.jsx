@@ -1,8 +1,11 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import styles from "./Sidebar.module.css";
+import ProfileTab from "./ProfileTab/ProfileTab";
+import { useState } from "react";
 
 export default function Sidebar() {
+  const [dispalyProfile, setDisplayProfile] = useState(false);
   return (
     <div className={styles.sidebar}>
       <div className={styles.nav}>
@@ -41,27 +44,37 @@ export default function Sidebar() {
           <img src="/tasks.png" alt="tasks" />
           My Tasks
         </NavLink>
+        <NavLink
+          to="/dashboard/timeline"
+          className={({ isActive }) =>
+            isActive
+              ? `${styles.navButton} ${styles.navButtonActive}`
+              : styles.navButton
+          }
+        >
+          <img src="/static.png" alt="timeline" />
+          Timeline
+        </NavLink>
 
         {/* Keep the rest as normal buttons for now */}
 
-        <button className={styles.navButton}>
-          <img src="/static.png" alt="" />
-          Static's
-        </button>
         <button className={styles.navButton}>
           <img src="/doc.png" alt="" />
           Document
         </button>
       </div>
 
-      <div className={styles.teams}>
-        <p>
-          <b>Teams:</b>
-        </p>
-        <button className={styles.teamButton}>Marketing</button>
-        <button className={styles.teamButton}>Sales</button>
-        <button className={styles.teamButton}>Development</button>
-      </div>
+      <button
+        className={styles.profileTabButton}
+        onClick={() => setDisplayProfile(true)}
+      >
+        <img className={styles.profilePic} src="/profile.png" alt="" />
+        Profile
+      </button>
+
+      {dispalyProfile && (
+        <ProfileTab onClose={() => setDisplayProfile(false)} />
+      )}
     </div>
   );
 }

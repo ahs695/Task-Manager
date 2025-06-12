@@ -5,6 +5,7 @@
   background-color: #201f32;
   border-radius: 20px;
   width: 250px;
+  height: 90vh;
   padding-top: 40px;
   padding-bottom: 40px;
   gap: 30px;
@@ -12,20 +13,12 @@
   position: fixed;
 }
 
-.nav,
-.teams {
+.nav {
   display: flex;
   flex-direction: column;
   gap: 15px;
   text-align: start;
   align-items: flex-start;
-}
-
-.teamButton {
-  color: aliceblue;
-  background-color: #201f32;
-  border: none;
-  font-size: 20px;
 }
 
 .navButton {
@@ -46,10 +39,21 @@
   color: #201f32;
 }
 
-.teams p {
-  font-size: 25px;
-}
-
 .sidebar img {
   height: 16px;
+}
+
+.profileTabButton {
+  background-color: aliceblue;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  font-size: 20px;
+}
+
+.profileTabButton img {
+  height: 25px;
 }

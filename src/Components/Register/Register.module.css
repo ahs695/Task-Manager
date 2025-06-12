@@ -1,5 +1,5 @@
 .register {
-  background: linear-gradient(to right, #7a13e7 50%, aliceblue 50%);
+  background: linear-gradient(to right, #201f32 50%, aliceblue 50%);
   display: flex;
   justify-content: space-around;
   padding-top: 70px;
@@ -7,7 +7,7 @@
 }
 
 .signinContainer {
-  background-color: white;
+  background-color: #d9f275;
   width: 50%;
   padding: 20px 40px;
   border-radius: 15px;
@@ -17,7 +17,7 @@
 }
 
 .registerMessage h2 {
-  color: #7a13e7;
+  color: #201f32;
 }
 
 .registerForm {
@@ -37,7 +37,7 @@
 
 .registerButton {
   width: 200px;
-  background-color: #7a13e7;
+  background-color: #201f32;
   color: white;
   border-radius: 8px;
   border: 0.5px solid rgba(103, 102, 102, 0.309);

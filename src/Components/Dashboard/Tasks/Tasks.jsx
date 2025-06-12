@@ -4,7 +4,7 @@ import TaskCard from "../TaskCard/TaskCard";
 import CreateTaskModal from "./CreateTaskModal/CreateTask";
 import axios from "axios";
 
-export default function Tasks({ allTasks, fetchTasks }) {
+export default function Tasks({ allTasks, fetchTasks, setDelCount }) {
   const [showModal, setShowModal] = useState(false);
 
   const [newTask, setNewTask] = useState({
@@ -32,7 +32,14 @@ export default function Tasks({ allTasks, fetchTasks }) {
   const handleSubmitTask = async () => {
     try {
       // Prepare task data (exclude creationTime)
-      const { _id, creationTime, ...taskData } = newTask;
+      const {
+        _id,
+        creationTime,
+        startedTime,
+        reviewTime,
+        completionTime,
+        ...taskData
+      } = newTask;
 
       if (editMode && _id) {
         // Update existing task
@@ -79,10 +86,21 @@ export default function Tasks({ allTasks, fetchTasks }) {
       return;
     }
 
+    // Prepare time updates
+    const timeUpdate = {};
+    if (targetCategory === "inprogress" && !task.startedTime) {
+      timeUpdate.startedTime = new Date();
+    } else if (targetCategory === "underreview" && !task.reviewTime) {
+      timeUpdate.reviewTime = new Date();
+    } else if (targetCategory === "completed" && !task.completionTime) {
+      timeUpdate.completionTime = new Date();
+    }
+
     try {
       await axios.put(`http://localhost:5000/api/tasks/${task._id}`, {
         ...task,
         category: targetCategory,
+        ...timeUpdate,
       });
 
       await fetchTasks(); // Refresh task list after updating
@@ -99,9 +117,8 @@ export default function Tasks({ allTasks, fetchTasks }) {
   return (
     <div className={styles.tasks}>
       <div className={styles.searchBar}>
-        <div className={styles.search}>
-          <img src="/search2.png" alt="" />
-          <input type="text" placeholder="Search Task" />
+        <div>
+          <h2>My Tasks</h2>
         </div>
         <button
           className={styles.createButton}
@@ -151,6 +168,7 @@ export default function Tasks({ allTasks, fetchTasks }) {
                       await axios.delete(
                         `http://localhost:5000/api/tasks/${task._id}`
                       );
+                      setDelCount((prev) => prev + 1);
                       fetchTasks(); // Refresh after deletion
                     } catch (err) {
                       console.error("Error deleting task:", err);
@@ -192,6 +210,8 @@ export default function Tasks({ allTasks, fetchTasks }) {
                       await axios.delete(
                         `http://localhost:5000/api/tasks/${task._id}`
                       );
+                      setDelCount((prev) => prev + 1);
+
                       fetchTasks(); // Refresh after deletion
                     } catch (err) {
                       console.error("Error deleting task:", err);
@@ -233,6 +253,8 @@ export default function Tasks({ allTasks, fetchTasks }) {
                       await axios.delete(
                         `http://localhost:5000/api/tasks/${task._id}`
                       );
+                      setDelCount((prev) => prev + 1);
+
                       fetchTasks(); // Refresh after deletion
                     } catch (err) {
                       console.error("Error deleting task:", err);

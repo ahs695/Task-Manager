@@ -42,6 +42,7 @@ img {
   border: none;
   padding: 0 8px;
   border-radius: 15px;
+  height: 30px;
 }
 
 .profilePic {
