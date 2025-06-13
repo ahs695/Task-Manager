@@ -1,0 +1,300 @@
+import React, { useState } from "react";
+import styles from "./Tasks.module.css";
+import TaskCard from "../TaskCard/TaskCard";
+import CreateTaskModal from "./CreateTaskModal/CreateTask";
+import axios from "axios";
+
+export default function Tasks({ allTasks, fetchTasks }) {
+  const [showModal, setShowModal] = useState(false);
+
+  const [newTask, setNewTask] = useState({
+    label: "",
+    title: "",
+    description: "",
+    priority: "Low",
+    category: "todo",
+  });
+
+  //For edit:
+  const [editMode, setEditMode] = useState(false);
+  const [editingTask, setEditingTask] = useState({
+    task: null,
+    sourceSetter: null,
+  });
+
+  const [draggedTask, setDraggedTask] = useState(null);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewTask((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmitTask = async () => {
+    try {
+      // Prepare task data (exclude creationTime)
+      const { _id, creationTime, ...taskData } = newTask;
+
+      if (editMode && _id) {
+        // Update existing task
+        await axios.put(`http://localhost:5000/api/tasks/${_id}`, taskData);
+      } else {
+        // Create new task
+        console.log(taskData);
+        await axios.post(`http://localhost:5000/api/tasks`, taskData);
+      }
+      await fetchTasks();
+      // Reset modal and task form
+      setShowModal(false);
+      setEditMode(false);
+      setNewTask({
+        label: "",
+        title: "",
+        description: "",
+        priority: "Low",
+        category: "todo",
+      });
+      setEditingTask({ task: null, sourceSetter: null });
+    } catch (error) {
+      console.error("Error submitting task:", error);
+      alert("There was an error saving the task. Please check your input.");
+    }
+  };
+
+  // DRAG START
+  const handleDragStart = (task, source) => {
+    setDraggedTask({ task, source });
+    {
+      console.log("drag started");
+    }
+  };
+
+  // DROP LOGIC
+  const handleDrop = async (targetCategory) => {
+    if (!draggedTask) return;
+
+    const { task } = draggedTask;
+
+    if (task.category === targetCategory) {
+      setDraggedTask(null);
+      return;
+    }
+
+    try {
+      await axios.put(`http://localhost:5000/api/tasks/${task._id}`, {
+        ...task,
+        category: targetCategory,
+      });
+
+      await fetchTasks(); // Refresh task list after updating
+    } catch (err) {
+      console.error("Failed to update task category:", err);
+      alert("Failed to move task. Try again.");
+    }
+
+    setDraggedTask(null);
+  };
+
+  const allowDrop = (e) => e.preventDefault();
+
+  return (
+    <div className={styles.tasks}>
+      <div className={styles.searchBar}>
+        <div className={styles.search}>
+          <img src="/search2.png" alt="" />
+          <input type="text" placeholder="Search Task" />
+        </div>
+        <button
+          className={styles.createButton}
+          onClick={() => setShowModal(true)}
+        >
+          <img src="/create.png" alt="create" />
+          Create Task
+        </button>
+      </div>
+
+      <div className={styles.taskHead}>
+        <div className={styles.taskStatus}>To Do</div>
+        <div className={styles.taskStatus}>In Progress</div>
+        <div className={styles.taskStatus}>Under Review</div>
+        <div className={styles.taskStatus}>Completed</div>
+      </div>
+
+      <div className={styles.taskCards}>
+        {/* TO DO */}
+        <div
+          className={styles.toDoCards}
+          onDragOver={allowDrop}
+          onDrop={() => handleDrop("todo")}
+        >
+          {allTasks
+            .filter((task) => task.category === "todo")
+            .map((task) => (
+              <div
+                key={task._id}
+                draggable
+                onDragStart={() => handleDragStart(task)}
+              >
+                <TaskCard
+                  label={task.label}
+                  title={task.title}
+                  description={task.description}
+                  creationTime={task.creationTime}
+                  priority={task.priority}
+                  onEdit={() => {
+                    setEditMode(true);
+                    setShowModal(true);
+                    setNewTask(task);
+                    setEditingTask({ task });
+                  }}
+                  onDelete={async () => {
+                    try {
+                      await axios.delete(
+                        `http://localhost:5000/api/tasks/${task._id}`
+                      );
+                      fetchTasks(); // Refresh after deletion
+                    } catch (err) {
+                      console.error("Error deleting task:", err);
+                    }
+                  }}
+                />
+              </div>
+            ))}
+        </div>
+
+        {/* IN PROGRESS */}
+        <div
+          className={styles.inProgressCards}
+          onDragOver={allowDrop}
+          onDrop={() => handleDrop("inprogress")}
+        >
+          {allTasks
+            .filter((task) => task.category === "inprogress")
+            .map((task) => (
+              <div
+                key={task._id}
+                draggable
+                onDragStart={() => handleDragStart(task)}
+              >
+                <TaskCard
+                  label={task.label}
+                  title={task.title}
+                  description={task.description}
+                  creationTime={task.creationTime}
+                  priority={task.priority}
+                  onEdit={() => {
+                    setEditMode(true);
+                    setShowModal(true);
+                    setNewTask(task);
+                    setEditingTask({ task });
+                  }}
+                  onDelete={async () => {
+                    try {
+                      await axios.delete(
+                        `http://localhost:5000/api/tasks/${task._id}`
+                      );
+                      fetchTasks(); // Refresh after deletion
+                    } catch (err) {
+                      console.error("Error deleting task:", err);
+                    }
+                  }}
+                />
+              </div>
+            ))}
+        </div>
+
+        {/* UNDER REVIEW */}
+        <div
+          className={styles.underReviewCards}
+          onDragOver={allowDrop}
+          onDrop={() => handleDrop("underreview")}
+        >
+          {allTasks
+            .filter((task) => task.category === "underreview")
+            .map((task) => (
+              <div
+                key={task._id}
+                draggable
+                onDragStart={() => handleDragStart(task)}
+              >
+                <TaskCard
+                  label={task.label}
+                  title={task.title}
+                  description={task.description}
+                  creationTime={task.creationTime}
+                  priority={task.priority}
+                  onEdit={() => {
+                    setEditMode(true);
+                    setShowModal(true);
+                    setNewTask(task);
+                    setEditingTask({ task });
+                  }}
+                  onDelete={async () => {
+                    try {
+                      await axios.delete(
+                        `http://localhost:5000/api/tasks/${task._id}`
+                      );
+                      fetchTasks(); // Refresh after deletion
+                    } catch (err) {
+                      console.error("Error deleting task:", err);
+                    }
+                  }}
+                />
+              </div>
+            ))}
+        </div>
+
+        {/* COMPLETED */}
+        <div
+          className={styles.completedCards}
+          onDragOver={allowDrop}
+          onDrop={() => handleDrop("completed")}
+        >
+          {allTasks
+            .filter((task) => task.category === "completed")
+            .map((task) => (
+              <div
+                key={task._id}
+                draggable
+                onDragStart={() => handleDragStart(task)}
+              >
+                <TaskCard
+                  label={task.label}
+                  title={task.title}
+                  description={task.description}
+                  creationTime={task.creationTime}
+                  priority={task.priority}
+                  onEdit={() => {
+                    alert("Completed Tasks can not be Edited");
+                  }}
+                  onDelete={() => {
+                    alert("Completed Tasks can not be Deleted");
+                  }}
+                />
+              </div>
+            ))}
+        </div>
+      </div>
+
+      {/* Task Modal */}
+      {showModal && (
+        <CreateTaskModal
+          operation={editMode ? "Edit Task" : "Create Task"}
+          newTask={newTask}
+          onChange={handleInputChange}
+          onClose={() => {
+            setShowModal(false);
+            setEditMode(false);
+            setEditingTask(null);
+          }}
+          onSubmit={handleSubmitTask}
+          onCloseTab={() => {
+            setShowModal(false);
+            setEditMode(false);
+            setEditingTask(null);
+          }}
+          operationButton={editMode ? "Save Changes" : "Add Task"}
+        />
+      )}
+    </div>
+  );
+}

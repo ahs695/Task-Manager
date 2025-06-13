@@ -1,0 +1,75 @@
+.tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.searchBar {
+  display: flex;
+  height: 50px;
+  padding: 10px 20px;
+  background-color: #d9f275;
+  border-radius: 25px;
+  justify-content: space-between;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.searchBar img {
+  height: 15px;
+}
+
+.searchBar input {
+  background: none;
+  border: none;
+  font-size: 17px;
+  border: 1px solid black;
+  padding: 5px;
+  border-radius: 18px;
+}
+
+.createButton {
+  background-color: #201f32;
+  color: aliceblue;
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+}
+
+.taskHead {
+  display: flex;
+  gap: 10px;
+}
+
+.taskStatus {
+  width: 25%;
+  display: flex;
+  justify-content: center;
+  background-color: #201f32;
+  color: aliceblue;
+  border-radius: 20px;
+  padding: 10px;
+}
+
+.taskCards {
+  display: flex;
+  gap: 10px;
+}
+
+.toDoCards,
+.inProgressCards,
+.underReviewCards,
+.completedCards {
+  width: 25%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
