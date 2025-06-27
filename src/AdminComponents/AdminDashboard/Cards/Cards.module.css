@@ -1,0 +1,92 @@
+.cardContainer {
+  display: flex;
+  gap: 20px;
+}
+
+card {
+  border-radius: 20px;
+  padding: 20px 15px;
+}
+
+.infoCard {
+  width: 35%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background-color: white;
+}
+
+.infoData {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.infoData h2 {
+  font-size: 40px;
+  color: #201f32;
+}
+
+.infoData p {
+  color: grey;
+}
+
+progress {
+  width: 80%;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-between;
+}
+
+.stat img {
+  height: 40px;
+}
+
+.stat p {
+  color: #201f32;
+  text-align: center;
+  font-size: small;
+}
+
+.stat {
+  width: 80px;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 10px;
+  align-items: center;
+  border-radius: 10px;
+  gap: 5px;
+}
+
+.processCard {
+  width: 35%;
+  background-color: #201f32;
+}
+
+.progressCard {
+  width: 30%;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.compProj,
+.newProj,
+.progProj {
+  display: flex;
+  gap: 20px;
+  /* background-color: #d9f275; */
+  justify-content: flex-start;
+  align-items: center;
+  padding: 10px 20px;
+  border-radius: 15px;
+}
+
+.compProj img,
+.newProj img,
+.progProj img {
+  height: 30px;
+}

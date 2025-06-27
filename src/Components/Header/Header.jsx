@@ -40,16 +40,6 @@ export default function Header() {
           >
             Login
           </NavLink>
-          <NavLink
-            to="/dashboard/info"
-            className={({ isActive }) =>
-              isActive
-                ? `${styles.navLink} ${styles.navLinkActive}`
-                : styles.navLink
-            }
-          >
-            Dashboard
-          </NavLink>
         </nav>
       </div>
     </header>

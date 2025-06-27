@@ -1,0 +1,84 @@
+.myTasks {
+  display: flex;
+  flex-direction: column;
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  gap: 20px;
+  padding-left: 20px;
+  padding-bottom: 50px;
+}
+
+.myTasksTop {
+  background-color: #d9f275;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  border-radius: 40px;
+}
+
+.taskOptions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.taskOption {
+  background-color: #201f32;
+  border: none;
+  padding: 10px 20px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border-radius: 20px;
+  color: aliceblue;
+  font-size: 16px;
+}
+
+.taskOption input {
+  width: 160px;
+  background: none;
+  border: none;
+  color: aliceblue;
+}
+
+.taskOption input::placeholder {
+  color: aliceblue;
+  font-size: 16px;
+}
+
+.myTasksData {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.taskHead {
+  display: flex;
+  gap: 10px;
+}
+
+.taskStatus {
+  width: 25%;
+  display: flex;
+  justify-content: center;
+  background-color: #201f32;
+  color: aliceblue;
+  border-radius: 20px;
+  padding: 10px;
+}
+
+.taskCards {
+  display: flex;
+  gap: 10px;
+}
+
+.toDoCards,
+.inProgressCards,
+.underReviewCards,
+.completedCards {
+  width: 25%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}

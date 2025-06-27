@@ -9,18 +9,30 @@ export default function TaskCard({
   priority,
   onEdit,
   onDelete,
+  onFullView,
 }) {
   return (
     <div className={styles.taskCard}>
       <div className={styles.taskCardTop}>
-        <h3>{label}</h3>
+        <h4>{label}</h4>
         <div className={styles.taskButtons}>
           <img src="/edit.png" alt="Edit" onClick={onEdit} />
           <img src="/delete.png" alt="Delete" onClick={onDelete} />
         </div>
       </div>
-      <h2>{title}</h2>
-      <p>{description}</p>
+      <div className={styles.taskCardHead}>
+        <h2>{title}</h2>
+        <button className={styles.viewTask} onClick={onFullView}>
+          Full View
+        </button>
+      </div>
+
+      <p>
+        {description.length > 100
+          ? description.slice(0, 100) + "..."
+          : description}
+      </p>
+
       <div className={styles.taskCardBottom}>
         <div className={styles.creationTime}>
           <p>

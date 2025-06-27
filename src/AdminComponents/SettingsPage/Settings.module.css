@@ -1,0 +1,8 @@
+.settingsContainer {
+  display: flex;
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  gap: 20px;
+  padding-left: 20px;
+  padding-bottom: 50px;
+}

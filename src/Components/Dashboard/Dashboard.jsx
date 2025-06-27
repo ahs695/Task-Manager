@@ -4,7 +4,9 @@ import Info from "./DashInfo/Info";
 import { Routes, Route } from "react-router-dom";
 import Callender from "../Callender/Callender";
 import MyTasks from "../MyTasks/MyTasks";
+import Profile from "../Profile/Profile";
 import Timeline from "../Timeline/Timeline";
+import MyFiles from "../MyFiles/MyFiles";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -63,6 +65,8 @@ function Dashboard() {
         <Route path="callender" element={<Callender />} />
         <Route path="myTasks" element={<MyTasks allTasks={allTasks} />} />
         <Route path="timeline" element={<Timeline allTasks={allTasks} />} />
+        <Route path="profile" element={<Profile />} />
+        <Route path="myFiles" element={<MyFiles />} />
       </Routes>
     </div>
   );

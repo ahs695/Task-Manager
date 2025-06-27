@@ -1,0 +1,56 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #201f32;
+  border-radius: 20px;
+  width: 250px;
+  height: 90vh;
+  padding: 40px 20px;
+  gap: 30px;
+  position: fixed;
+  justify-content: space-between;
+}
+
+.nav,
+.profileOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  text-align: start;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.navButton,
+.profileOptions button {
+  background-color: #f0f8ff;
+  color: #201f32;
+  border: none;
+  display: flex;
+  gap: 10px;
+  font-size: 15px;
+  padding: 8px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  align-items: center;
+  width: 100%; /* Full width of sidebar's padding box */
+  box-sizing: border-box; /* Ensures padding doesn't overflow width */
+  justify-content: flex-start; /* Align icon + text to the left */
+}
+
+.navButtonActive {
+  background-color: #d9f275;
+  color: #201f32;
+  width: 100%; /* Same width as inactive buttons */
+  box-sizing: border-box;
+}
+
+.navButtonActive {
+  background-color: #d9f275;
+  color: #201f32;
+}
+
+.sidebar img {
+  height: 16px;
+}

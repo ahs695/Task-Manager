@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styles from "./Tasks.module.css";
 import TaskCard from "../TaskCard/TaskCard";
 import CreateTaskModal from "./CreateTaskModal/CreateTask";
+import ViewTask from "./ViewTaskModal/ViewTask";
 import axios from "axios";
 
 export default function Tasks({ allTasks, fetchTasks, setDelCount }) {
@@ -23,6 +24,27 @@ export default function Tasks({ allTasks, fetchTasks, setDelCount }) {
   });
 
   const [draggedTask, setDraggedTask] = useState(null);
+
+  const [viewingTask, setViewingTask] = useState(null);
+
+  const handleAddComment = async (commentText) => {
+    try {
+      const updatedComments = [...viewingTask.comments, commentText];
+      await axios.put(`http://localhost:5000/api/tasks/${viewingTask._id}`, {
+        comments: [...viewingTask.comments, commentText],
+      });
+
+      setViewingTask((prev) => ({
+        ...prev,
+        comments: updatedComments,
+      }));
+
+      await fetchTasks();
+    } catch (err) {
+      console.error("Error adding comment:", err);
+      alert("Failed to add comment.");
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -122,7 +144,18 @@ export default function Tasks({ allTasks, fetchTasks, setDelCount }) {
         </div>
         <button
           className={styles.createButton}
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            setNewTask({
+              label: "",
+              title: "",
+              description: "",
+              priority: "Low",
+              category: "todo",
+            });
+            setEditMode(false);
+            setEditingTask({ task: null, sourceSetter: null });
+            setShowModal(true);
+          }}
         >
           <img src="/create.png" alt="create" />
           Create Task
@@ -174,6 +207,7 @@ export default function Tasks({ allTasks, fetchTasks, setDelCount }) {
                       console.error("Error deleting task:", err);
                     }
                   }}
+                  onFullView={() => setViewingTask(task)}
                 />
               </div>
             ))}
@@ -217,6 +251,7 @@ export default function Tasks({ allTasks, fetchTasks, setDelCount }) {
                       console.error("Error deleting task:", err);
                     }
                   }}
+                  onFullView={() => setViewingTask(task)}
                 />
               </div>
             ))}
@@ -260,6 +295,7 @@ export default function Tasks({ allTasks, fetchTasks, setDelCount }) {
                       console.error("Error deleting task:", err);
                     }
                   }}
+                  onFullView={() => setViewingTask(task)}
                 />
               </div>
             ))}
@@ -291,6 +327,7 @@ export default function Tasks({ allTasks, fetchTasks, setDelCount }) {
                   onDelete={() => {
                     alert("Completed Tasks can not be Deleted");
                   }}
+                  onFullView={() => setViewingTask(task)}
                 />
               </div>
             ))}
@@ -315,6 +352,15 @@ export default function Tasks({ allTasks, fetchTasks, setDelCount }) {
             setEditingTask(null);
           }}
           operationButton={editMode ? "Save Changes" : "Add Task"}
+        />
+      )}
+      {viewingTask && (
+        <ViewTask
+          task={viewingTask}
+          onCloseTab={() => {
+            setViewingTask(false);
+          }}
+          onAddComment={handleAddComment}
         />
       )}
     </div>

@@ -1,11 +1,10 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import styles from "./Sidebar.module.css";
-import ProfileTab from "./ProfileTab/ProfileTab";
 import { useState } from "react";
 
 export default function Sidebar() {
-  const [dispalyProfile, setDisplayProfile] = useState(false);
+  const navigate = useNavigate();
   return (
     <div className={styles.sidebar}>
       <div className={styles.nav}>
@@ -29,7 +28,7 @@ export default function Sidebar() {
               : styles.navButton
           }
         >
-          <img src="/callender.png" alt="Callender" />
+          <img src="/calenderdb.png" alt="Callender" />
           Calender
         </NavLink>
 
@@ -41,7 +40,7 @@ export default function Sidebar() {
               : styles.navButton
           }
         >
-          <img src="/tasks.png" alt="tasks" />
+          <img src="/mytasksdb.png" alt="tasks" />
           My Tasks
         </NavLink>
         <NavLink
@@ -52,29 +51,48 @@ export default function Sidebar() {
               : styles.navButton
           }
         >
-          <img src="/static.png" alt="timeline" />
+          <img src="/timelinedb.png" alt="timeline" />
           Timeline
         </NavLink>
-
-        {/* Keep the rest as normal buttons for now */}
-
-        <button className={styles.navButton}>
-          <img src="/doc.png" alt="" />
-          Document
-        </button>
+        <NavLink
+          to="/dashboard/myFiles"
+          className={({ isActive }) =>
+            isActive
+              ? `${styles.navButton} ${styles.navButtonActive}`
+              : styles.navButton
+          }
+        >
+          <img src="/documentdb.png" alt="dic" />
+          My Tasks
+        </NavLink>
       </div>
 
-      <button
-        className={styles.profileTabButton}
-        onClick={() => setDisplayProfile(true)}
-      >
-        <img className={styles.profilePic} src="/profile.png" alt="" />
-        Profile
-      </button>
-
-      {dispalyProfile && (
-        <ProfileTab onClose={() => setDisplayProfile(false)} />
-      )}
+      <div className={styles.profileOptions}>
+        <NavLink
+          to="/dashboard/profile"
+          className={({ isActive }) =>
+            isActive
+              ? `${styles.navButton} ${styles.navButtonActive}`
+              : styles.navButton
+          }
+        >
+          <img src="/profile.png" alt="prof" />
+          Profile
+        </NavLink>
+        <button>
+          {" "}
+          <img src="/settingdb.png" alt="" />
+          Settings
+        </button>
+        <button
+          onClick={() => {
+            navigate("/");
+          }}
+        >
+          {" "}
+          <img src="/logoutdb.png" alt="logout" /> Log Out
+        </button>
+      </div>
     </div>
   );
 }

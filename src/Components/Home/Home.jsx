@@ -4,7 +4,7 @@ import styles from "./Home.module.css";
 function Home() {
   return (
     <div className={styles.home}>
-      <img class={styles.homeImg} src="./wtriangle.png" alt="triangles" />
+      <img className={styles.homeImg} src="./wtriangle.png" alt="triangles" />
       <div className={styles.welcome}>
         <h1 className={styles.homeTitle}>
           Welcome to
@@ -16,7 +16,7 @@ function Home() {
           More
         </p>
       </div>
-      <img class={styles.homeImg} src="./ptriangle.png" alt="triangles" />
+      <img className={styles.homeImg} src="./ptriangle.png" alt="triangles" />
     </div>
   );
 }

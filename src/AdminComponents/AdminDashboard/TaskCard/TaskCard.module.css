@@ -1,0 +1,94 @@
+.taskCard {
+  background-color: #201f32;
+  border-radius: 20px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.taskCard p {
+  color: black;
+}
+
+.taskCardTop {
+  background-color: #acc8e5;
+  color: #201f32;
+  display: flex;
+  height: 30px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 10px;
+  border-radius: 15px;
+}
+
+.taskCardHead {
+  display: flex;
+  justify-content: space-between;
+}
+
+.viewTask {
+  background-color: aliceblue;
+  color: #201f32;
+  border: none;
+  padding: 3px 10px;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  max-height: 30px;
+
+  font-weight: bold;
+}
+
+.taskCard h3 {
+  color: aliceblue;
+}
+
+.taskCardBottom {
+  background-color: #acc8e5;
+  display: flex;
+  height: 30px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 10px;
+  border-radius: 15px;
+}
+
+.creationTime p {
+  color: #201f32;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.priority {
+  padding: 4px 8px;
+  border-radius: 10px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  text-align: center;
+  border: 1px solid black;
+}
+
+/* Priority colors */
+.high {
+  background-color: #e74c3c; /* Red */
+}
+
+.moderate {
+  background-color: #f1c40f; /* Yellow */
+  color: black;
+}
+
+.low {
+  background-color: #2ecc71; /* Green */
+}
+
+.taskButtons {
+  display: flex;
+  height: 20px;
+  gap: 5px;
+}

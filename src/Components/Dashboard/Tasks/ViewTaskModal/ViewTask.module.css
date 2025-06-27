@@ -1,0 +1,95 @@
+.viewTaskOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0%);
+  }
+}
+
+.viewTask {
+  background: white;
+  padding: 2rem;
+  position: relative;
+  width: 500px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 90%;
+  transform: translateX(100%);
+  animation: slideInFromRight 0.6s ease forwards;
+  overflow-y: scroll;
+}
+
+.viewTask::-webkit-scrollbar {
+  display: none;
+}
+
+.taskTitle {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  font-size: 30px;
+  background-color: aliceblue;
+  padding: 5px;
+  border-radius: 25px;
+  color: #201f32;
+}
+
+.taskData {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.taskData p {
+  color: #201f32;
+  font-size: 20px;
+}
+
+.commentsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.commentInput {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.commentInput textarea {
+  border: none;
+  background-color: #f0f8ff;
+  height: 40px;
+  padding: 5px;
+  border-radius: 15px;
+  font-size: 20px;
+}
+
+.commentInput textarea::placeholder {
+  font-size: 20px;
+}
+
+.commentInput button {
+  padding: 10px 20px;
+  width: fit-content;
+  background-color: #201f32;
+  color: aliceblue;
+  border: none;
+  border-radius: 10px;
+}
