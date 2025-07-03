@@ -72,6 +72,8 @@
   background-color: #201f32;
   color: aliceblue;
   border-radius: 10px;
+  width: 60%;
+  align-self: center;
 }
 
 .editProfile {
@@ -81,7 +83,7 @@
   background-color: white;
   padding: 20px;
   border-radius: 25px;
-  gap: 30px;
+  gap: 20px;
 }
 
 .insightContainer {

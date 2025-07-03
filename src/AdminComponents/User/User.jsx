@@ -2,19 +2,21 @@ import React, { useState, useEffect } from "react";
 import styles from "./User.module.css";
 import FilterUser from "./FilterUser/FilterUser";
 import CreateOrEditUser from "./CreateUser/CreateOrEditUser";
-import { useAuth } from "../../contexts/AuthContext";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchAllUsers } from "../../Redux/Users/userAPI";
+import { hasPermission } from "../../App/Utility/permission";
 
-export default function User({
-  allUsers,
-  fetchUsers,
-  allProjects,
-  taskAssignments,
-}) {
+export default function User() {
+  const permissions = useSelector((state) => state.auth.permissions);
+  const dispatch = useDispatch();
+  const allUsers = useSelector((state) => state.users.allUsers);
+  const [searchQuery, setSearchQuery] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [filteredUsers, setFilteredUsers] = useState(allUsers);
   const [editUser, setEditUser] = useState(null);
-  const { auth } = useAuth();
+  const auth = useSelector((state) => state.auth);
+  const [userModalMode, setUserModalMode] = useState("create");
 
   const handleDelete = async (userId) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
@@ -32,7 +34,7 @@ export default function User({
       if (!res.ok) throw new Error(data.message || "Failed to delete user");
 
       alert("User deleted successfully!");
-      fetchUsers(); // Refresh list
+      dispatch(fetchAllUsers()); // Refresh list
     } catch (err) {
       console.error(err);
       alert(err.message);
@@ -43,11 +45,28 @@ export default function User({
     setFilteredUsers(allUsers);
   }, [allUsers]);
 
+  useEffect(() => {
+    const searched = allUsers.filter((user) =>
+      user.email.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredUsers(searched);
+  }, [searchQuery, allUsers]);
+
   return (
     <div className={styles.user}>
       <div className={styles.userTop}>
         <h2>All Users</h2>
         <div className={styles.userOptions}>
+          <div className={styles.userOption}>
+            <img src="/searchab.png" alt="" />
+            <input
+              type="text"
+              placeholder="Search user"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
           <button
             className={styles.userOption}
             onClick={() => setShowFilter(true)}
@@ -58,7 +77,15 @@ export default function User({
 
           <button
             className={styles.userOption}
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              if (!hasPermission(permissions, "user", "create")) {
+                alert("You do not have permission to create users.");
+                return;
+              }
+              setEditUser(null);
+              setUserModalMode("create");
+              setShowModal(true);
+            }}
           >
             <img src="/add-userab.png" alt="Create" />
             Create
@@ -88,8 +115,13 @@ export default function User({
                   src="/edit.png"
                   alt="Edit"
                   onClick={() => {
+                    if (!hasPermission(permissions, "user", "edit")) {
+                      alert("You do not have permission to edit users.");
+                      return;
+                    }
                     setEditUser(user);
                     setShowModal(true);
+                    setUserModalMode("edit");
                   }}
                 />
 
@@ -97,7 +129,13 @@ export default function User({
                   src="/delete.png"
                   alt="Delete"
                   title="Delete"
-                  onClick={() => handleDelete(user._id)}
+                  onClick={() => {
+                    if (!hasPermission(permissions, "user", "delete")) {
+                      alert("You do not have permission to delete users.");
+                      return;
+                    }
+                    handleDelete(user._id);
+                  }}
                 />
               </td>
             </tr>
@@ -107,23 +145,19 @@ export default function User({
 
       {showModal && (
         <CreateOrEditUser
+          mode={userModalMode}
           onCloseTab={() => {
             setShowModal(false);
             setEditUser(null);
           }}
-          allUsers={allUsers}
-          fetchUsers={fetchUsers}
           editUser={editUser}
         />
       )}
 
       {showFilter && (
         <FilterUser
-          allUsers={allUsers}
           setFilteredUsers={setFilteredUsers}
           onCloseTab={() => setShowFilter(false)}
-          taskAssignments={taskAssignments}
-          allProjects={allProjects}
         />
       )}
     </div>

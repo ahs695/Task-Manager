@@ -52,7 +52,7 @@
   display: none;
 }
 
-.createUser h2 {
+.profHead h2 {
   color: aliceblue;
   font-size: 30px;
 }
@@ -60,7 +60,7 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 30px;
 }
 
 .form label {
@@ -73,11 +73,27 @@
 
 .form label input,
 .form label input::placeholder {
-  font-size: 20px;
+  font-size: 15px;
+}
+
+.form input {
+  width: 250px;
+  font-size: 15px;
+  border-radius: 10px;
+  border: none;
+  padding: 2px 5px;
+}
+
+.form input:focus {
+  outline: none;
 }
 
 .form select {
-  font-size: 20px;
+  font-size: 15px;
+
+  border-radius: 10px;
+  border: none;
+  padding: 2px 5px;
 }
 
 .form button {

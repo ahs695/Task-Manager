@@ -2,34 +2,58 @@ const express = require("express");
 const router = express.Router();
 const Task = require("../models/task");
 const TaskAssignment = require("../models/taskAssignment");
+const jwt = require("jsonwebtoken");
 
 // GET all tasks
 router.get("/", async (req, res) => {
   try {
-    const tasks = await Task.find();
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    let tasks;
+
+    if (["admin", "superAdmin"].includes(decoded.role)) {
+      tasks = await Task.find();
+    } else {
+      const assignments = await TaskAssignment.find({ userId: decoded.id });
+      const taskIds = assignments.map((a) => a.taskId);
+      tasks = await Task.find({ _id: { $in: taskIds } });
+    }
+
     res.json(tasks);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// POST create new task and related TaskAssignment
+// POST create task with statusHistory
 router.post("/", async (req, res) => {
   try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
     const taskData = req.body;
 
-    const newTask = new Task(taskData);
+    const newTask = new Task({
+      ...taskData,
+      statusHistory: [
+        {
+          status: taskData.category || "todo",
+          user: decoded.id,
+        },
+      ],
+    });
+
     const savedTask = await newTask.save();
 
-    // Create TaskAssignment if project is provided
     if (taskData.project) {
-      const assignment = new TaskAssignment({
+      await TaskAssignment.create({
         taskId: savedTask._id,
         userId: taskData.user || null,
         projectId: taskData.project,
       });
-
-      await assignment.save();
     }
 
     res.status(201).json(savedTask);
@@ -39,35 +63,74 @@ router.post("/", async (req, res) => {
   }
 });
 
-// PUT update task and update/create TaskAssignment
+// PUT update task and statusHistory
 router.put("/:id", async (req, res) => {
   try {
     const taskId = req.params.id;
     const taskData = req.body;
 
-    const updatedTask = await Task.findByIdAndUpdate(taskId, taskData, {
-      new: true,
-    });
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (!updatedTask) {
+    const existingTask = await Task.findById(taskId);
+    if (!existingTask) {
       return res.status(404).json({ error: "Task not found" });
     }
 
-    if (taskData.project) {
-      const existingAssignment = await TaskAssignment.findOne({ taskId });
+    const updateFields = {};
+    const updateOps = {};
 
-      if (existingAssignment) {
-        existingAssignment.userId = taskData.user || null;
-        existingAssignment.projectId = taskData.project;
-        await existingAssignment.save();
-      } else {
-        const newAssignment = new TaskAssignment({
-          taskId,
+    // Category/status update
+    const categoryChanged =
+      taskData.category && taskData.category !== existingTask.category;
+    if (categoryChanged) {
+      updateFields.category = taskData.category;
+      updateOps.$push = {
+        statusHistory: {
+          status: taskData.category,
+          user: decoded.id,
+          time: new Date(),
+        },
+      };
+    }
+
+    // Append to comments if provided
+    if (taskData.comments && Array.isArray(taskData.comments)) {
+      const newComment = taskData.comments[taskData.comments.length - 1];
+      if (newComment) {
+        updateOps.$push = {
+          ...updateOps.$push,
+          comments: newComment,
+        };
+      }
+    }
+
+    // Other direct updates
+    if (taskData.title) updateFields.title = taskData.title;
+    if (taskData.description) updateFields.description = taskData.description;
+    if (taskData.dueDate) updateFields.dueDate = taskData.dueDate;
+    if (taskData.priority) updateFields.priority = taskData.priority;
+
+    const updatedTask = await Task.findByIdAndUpdate(
+      taskId,
+      {
+        ...updateFields,
+        ...updateOps,
+      },
+      { new: true, runValidators: true }
+    );
+
+    // TaskAssignment update
+    if (taskData.project) {
+      await TaskAssignment.updateOne(
+        { taskId },
+        {
           userId: taskData.user || null,
           projectId: taskData.project,
-        });
-        await newAssignment.save();
-      }
+        },
+        { upsert: true }
+      );
     }
 
     res.json(updatedTask);

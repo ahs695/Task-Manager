@@ -13,13 +13,31 @@ const PORT = process.env.PORT || 5000;
 const seedInitialData = async () => {
   const defaultRoles = ["superAdmin", "admin", "staff"];
   const roleMap = {};
+  const allResources = [
+    "Dashboard",
+    "Calendar",
+    "Timeline",
+    "Task",
+    "Project",
+    "User",
+    "Setting",
+    "Profile",
+  ];
+  const allActions = ["view", "create", "edit", "delete"];
 
   for (const rolename of defaultRoles) {
     let role = await Role.findOne({ rolename });
+
     if (!role) {
-      role = await Role.create({ rolename });
+      const permissions =
+        rolename === "superAdmin"
+          ? allResources.map((resource) => ({ resource, actions: allActions }))
+          : [];
+
+      role = await Role.create({ rolename, permissions });
       console.log(`Created role: ${rolename}`);
     }
+
     roleMap[rolename] = role;
   }
 
@@ -60,11 +78,13 @@ const authRoutes = require("./routes/auth");
 const taskRoutes = require("./routes/taskRoutes");
 const projectRoutes = require("./routes/projectRoutes");
 const taskAssignmentRoutes = require("./routes/taskAssignments");
+const roleRoutes = require("./routes/roleRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/task-assignments", taskAssignmentRoutes);
+app.use("/api/roles", roleRoutes);
 
 app.get("/", (req, res) => {
   res.send("API running");

@@ -4,21 +4,22 @@ import axios from "axios";
 import TaskCard2 from "../AdminDashboard/TaskCard/TaskCard2";
 import Filter from "./Filter/Filter";
 import CreateTaskModal from "../AdminDashboard/Tasks/CreateTaskModal/CreateTask";
-
-export default function MyTasks({
-  allTasks,
-  allUsers,
-  fetchTasks,
-  allProjects,
-  taskAssignments,
-}) {
+import { useSelector, useDispatch } from "react-redux";
+import { fetchAllTasks } from "../../Redux/Tasks/taskAPI";
+import { fetchTaskAssignments } from "../../Redux/TaskAssignments/taskAssignmentAPI";
+export default function MyTasks() {
+  const allTasks = useSelector((state) => state.tasks.allTasks);
   const [showFilter, setShowFilter] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredTasks, setFilteredTasks] = useState(allTasks);
   const [intermediateTasks, setIntermediateTasks] = useState(allTasks); // holds tasks after filter but before search
-
+  const allProjects = useSelector((state) => state.projects.allProjects);
+  const allUsers = useSelector((state) => state.users.allUsers);
   const [showModal, setShowModal] = useState(false);
-
+  const taskAssignments = useSelector(
+    (state) => state.taskAssignments.assignments
+  );
+  const dispatch = useDispatch();
   const [newTask, setNewTask] = useState({
     project: "",
     title: "",
@@ -53,10 +54,9 @@ export default function MyTasks({
         taskData.user = null;
       }
 
-      // Always create new task (no editMode logic)
       await axios.post(`http://localhost:5000/api/tasks`, taskData);
-
-      await fetchTasks();
+      dispatch(fetchTaskAssignments());
+      dispatch(fetchAllTasks());
       setShowModal(false);
       setNewTask({
         project: "",
@@ -233,19 +233,13 @@ export default function MyTasks({
             setShowModal(false);
           }}
           operationButton="Add Task"
-          allUsers={allUsers}
-          allProjects={allProjects}
         />
       )}
 
       {showFilter && (
         <Filter
-          allTasks={allTasks}
           setFilteredTasks={setIntermediateTasks} // filter goes here first
           onCloseTab={() => setShowFilter(false)}
-          taskAssignments={taskAssignments}
-          allProjects={allProjects}
-          allUsers={allUsers}
         />
       )}
     </div>

@@ -4,42 +4,38 @@ import Info from "./DashInfo/Info";
 import { Routes, Route } from "react-router-dom";
 import Callender from "../Callender/Callender";
 import MyTasks from "../MyTasks/MyTasks";
+import Projects from "../Projects/Projects";
 import Profile from "../Profile/Profile";
 import Timeline from "../Timeline/Timeline";
 import MyFiles from "../MyFiles/MyFiles";
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAllTasks } from "../../Redux/Tasks/taskAPI";
+import { fetchAllProjects } from "../../Redux/Projects/projectAPI";
+import { fetchAllUsers } from "../../Redux/Users/userAPI";
+import { fetchTaskAssignments } from "../../Redux/TaskAssignments/taskAssignmentAPI";
 
 function Dashboard() {
-  const [allTasks, setAllTasks] = useState([]);
-  const [toDoTasks, setToDoTasks] = useState([]);
-  const [inProgressTasks, setInProgressTasks] = useState([]);
-  const [underReviewTasks, setUnderReviewTasks] = useState([]);
-  const [completedTasks, setCompletedTasks] = useState([]);
-
-  const fetchTasks = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/tasks");
-      const tasks = res.data;
-      setAllTasks(tasks);
-
-      // Set category-specific states
-      setToDoTasks(tasks.filter((task) => task.category === "todo"));
-      setInProgressTasks(
-        tasks.filter((task) => task.category === "inprogress")
-      );
-      setUnderReviewTasks(
-        tasks.filter((task) => task.category === "underreview")
-      );
-      setCompletedTasks(tasks.filter((task) => task.category === "completed"));
-    } catch (err) {
-      console.error("Failed to load tasks", err);
-    }
-  };
+  const dispatch = useDispatch();
+  const { allTasks, status, error } = useSelector((state) => state.tasks);
 
   useEffect(() => {
-    fetchTasks();
-  }, []);
+    dispatch(fetchAllTasks());
+    dispatch(fetchAllProjects());
+    dispatch(fetchAllUsers());
+    dispatch(fetchTaskAssignments());
+  }, [dispatch]);
+
+  const toDoTasks = allTasks.filter((task) => task.category === "todo");
+  const inProgressTasks = allTasks.filter(
+    (task) => task.category === "inprogress"
+  );
+  const underReviewTasks = allTasks.filter(
+    (task) => task.category === "underreview"
+  );
+  const completedTasks = allTasks.filter(
+    (task) => task.category === "completed"
+  );
 
   return (
     <div className={styles.content}>
@@ -50,20 +46,16 @@ function Dashboard() {
           element={
             <Info
               toDoTasks={toDoTasks}
-              setToDoTasks={setToDoTasks}
               inProgressTasks={inProgressTasks}
-              setInProgressTasks={setInProgressTasks}
               underReviewTasks={underReviewTasks}
-              setUnderReviewTasks={setUnderReviewTasks}
               completedTasks={completedTasks}
-              setCompletedTasks={setCompletedTasks}
               allTasks={allTasks}
-              fetchTasks={fetchTasks}
             />
           }
         />
         <Route path="callender" element={<Callender />} />
-        <Route path="myTasks" element={<MyTasks allTasks={allTasks} />} />
+        <Route path="myTasks" element={<MyTasks />} />
+        <Route path="projects" element={<Projects />} />
         <Route path="timeline" element={<Timeline allTasks={allTasks} />} />
         <Route path="profile" element={<Profile />} />
         <Route path="myFiles" element={<MyFiles />} />

@@ -1,6 +1,8 @@
 import React from "react";
 import styles from "./Cards.module.css";
 import Chart from "react-apexcharts";
+import { format, subDays, isSameDay } from "date-fns";
+import { useSelector } from "react-redux";
 
 export default function Cards({
   toDoCount,
@@ -9,6 +11,29 @@ export default function Cards({
   completedCount,
   delCount,
 }) {
+  const allTasks = useSelector((state) => state.tasks.allTasks);
+  const allProjects = useSelector((state) => state.projects.allProjects);
+  const today = new Date();
+  const last7Days = [...Array(7).keys()].map((i) => subDays(today, 6 - i));
+
+  // X-axis labels
+  const dayLabels = last7Days.map((day) => format(day, "EEE")); // ["Mon", "Tue", ...]
+
+  // Task stats per day
+  const createdCounts = last7Days.map(
+    (day) =>
+      allTasks.filter((task) => isSameDay(new Date(task.creationTime), day))
+        .length
+  );
+
+  const completedCounts = last7Days.map(
+    (day) =>
+      allTasks.filter(
+        (task) =>
+          task.completionTime && isSameDay(new Date(task.completionTime), day)
+      ).length
+  );
+
   const chartOptions = {
     chart: {
       type: "line",
@@ -16,7 +41,7 @@ export default function Cards({
       background: "transparent",
     },
     xaxis: {
-      categories: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+      categories: dayLabels,
     },
     stroke: {
       curve: "smooth",
@@ -24,17 +49,20 @@ export default function Cards({
     dataLabels: {
       enabled: false,
     },
-    colors: ["aliceblue"],
+    colors: ["#00c4ff", "#00e676"],
     grid: {
-      borderColor: "rgba(255, 255, 255, 0.1)", // optional: lighter grid
+      borderColor: "rgba(255, 255, 255, 0.1)",
     },
   };
 
   const chartSeries = [
     {
+      name: "Tasks Created",
+      data: createdCounts,
+    },
+    {
       name: "Tasks Completed",
-      data: [10, 20, 15, 30, 25],
-      color: "white",
+      data: completedCounts,
     },
   ];
 
@@ -55,15 +83,13 @@ export default function Cards({
             Task added <br />
             for all time
           </p>
-          <p>-</p>
-          <h2>{delCount}</h2>
-          <p>
-            {" "}
-            Projects <br />
-            Deleted
-          </p>
         </div>
-        <progress value={0.5} />
+        <progress
+          value={
+            completedCount /
+            (toDoCount + inProgressCount + underReviewCount + completedCount)
+          }
+        />
         <div className={styles.stats}>
           <div className={styles.stat} style={{ backgroundColor: "#B5E5FE" }}>
             <img src="/inprogress.png" alt="" />
@@ -104,6 +130,62 @@ export default function Cards({
       </card>
       <card className={styles.progressCard}>
         <h3>Monthly Progress</h3>
+        <div className={styles.newProj} style={{ backgroundColor: "#A2FFE7" }}>
+          <img src="/new-project.png" alt="" />
+          <h1>
+            {
+              allProjects.filter((project) => {
+                const created = new Date(project.creationTime);
+                const now = new Date();
+                return (
+                  created.getMonth() === now.getMonth() &&
+                  created.getFullYear() === now.getFullYear()
+                );
+              }).length
+            }
+          </h1>
+          <h3>
+            New <br />
+            Projects
+          </h3>
+        </div>
+        <div className={styles.progProj} style={{ backgroundColor: "#B5E5FE" }}>
+          <img src="/process.png" alt="" />
+          <h1>
+            {
+              allProjects.filter(
+                (project) =>
+                  project.completionTime === null ||
+                  project.completionTime === undefined
+              ).length
+            }
+          </h1>
+          <h3>
+            Projects <br />
+            In Progress
+          </h3>
+        </div>
+
+        <div className={styles.compProj} style={{ backgroundColor: "#E1DEFF" }}>
+          <img src="/done.png" alt="" />
+          <h1>
+            {
+              allProjects.filter((project) => {
+                if (!project.completionTime) return false;
+                const completed = new Date(project.completionTime);
+                const now = new Date();
+                return (
+                  completed.getMonth() === now.getMonth() &&
+                  completed.getFullYear() === now.getFullYear()
+                );
+              }).length
+            }
+          </h1>
+          <h3>
+            Projects <br />
+            Completed
+          </h3>
+        </div>
       </card>
     </div>
   );

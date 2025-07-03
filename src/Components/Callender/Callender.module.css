@@ -7,3 +7,158 @@
   padding-left: 20px;
   padding-bottom: 50px;
 }
+
+.calTop {
+  background-color: #d9f275;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 30px;
+  border-radius: 40px;
+}
+
+.calOptions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.calOption {
+  background-color: #201f32;
+  border: none;
+  padding: 10px 20px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border-radius: 20px;
+  color: aliceblue;
+  font-size: 16px;
+}
+
+.timelineContainer {
+  width: 100%;
+  background-color: #d9f275;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  border-radius: 10px;
+}
+
+.daysManipulation {
+  display: flex;
+  background: linear-gradient(135deg, rgb(0, 0, 143), #201f32);
+  justify-content: space-between;
+  padding: 5px;
+  color: aliceblue;
+  border-radius: 10px;
+  align-items: center;
+}
+
+.calButtons {
+  display: flex;
+  gap: 20px;
+}
+
+.calButtons button {
+  background: none;
+  color: aliceblue;
+  border: none;
+  cursor: pointer;
+  padding: 0 10px;
+}
+
+.dates {
+  display: flex;
+  gap: 20px;
+  overflow-x: scroll;
+  flex-wrap: nowrap;
+}
+
+.dates::-webkit-scrollbar {
+  display: none;
+}
+
+.dateData {
+  background-color: #201f32;
+  color: aliceblue;
+  min-height: 250px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 25px;
+  gap: 20px;
+}
+
+.headData {
+  display: flex;
+
+  align-items: first baseline;
+  justify-content: space-between;
+}
+
+.projectData,
+.taskData {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  font-size: 20px;
+}
+
+.projectStats {
+  font-size: 24px;
+}
+
+.dateData h3 {
+  font-size: 24px;
+  color: #d9f275;
+}
+
+.tasksOfProject {
+  /* margin-left: 60px; */
+  font-size: 20px;
+}
+
+.tasksOfProject p {
+  color: #d9f275;
+  font-size: 20px;
+}
+
+.tasksOfProject span {
+  color: red;
+  margin-left: 40px;
+}
+
+.tasksOfProject ul {
+  margin-left: 10px;
+}
+
+.futureData {
+  font-size: 24px;
+}
+
+ul {
+  margin-left: 40px;
+}
+
+.pendingTasks {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.projItems {
+  display: flex;
+  justify-content: space-around;
+}
+
+.tasksToday,
+.dueTask {
+  margin-left: 30px;
+  margin-top: 10px;
+}
+
+.projInfo {
+  display: flex;
+  gap: 25px;
+}

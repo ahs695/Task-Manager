@@ -1,103 +1,66 @@
 import React, { useState } from "react";
 import styles from "./Tasks.module.css";
 import TaskCard from "../TaskCard/TaskCard";
-import CreateTaskModal from "./CreateTaskModal/CreateTask";
 import ViewTask from "./ViewTaskModal/ViewTask";
 import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAllTasks } from "../../../Redux/Tasks/taskAPI";
+import { fetchTaskAssignments } from "../../../Redux/TaskAssignments/taskAssignmentAPI";
+import { jwtDecode } from "jwt-decode";
 
-export default function Tasks({ allTasks, fetchTasks, setDelCount }) {
-  const [showModal, setShowModal] = useState(false);
-
-  const [newTask, setNewTask] = useState({
-    label: "",
-    title: "",
-    description: "",
-    priority: "Low",
-    category: "todo",
-  });
-
-  //For edit:
-  const [editMode, setEditMode] = useState(false);
-  const [editingTask, setEditingTask] = useState({
-    task: null,
-    sourceSetter: null,
-  });
-
+export default function Tasks() {
+  const [viewingTask, setViewingTask] = useState(null);
   const [draggedTask, setDraggedTask] = useState(null);
 
-  const [viewingTask, setViewingTask] = useState(null);
+  const dispatch = useDispatch();
+  const allProjects = useSelector((state) => state.projects.allProjects);
+  const allUsers = useSelector((state) => state.users.allUsers);
+  const allTasks = useSelector((state) => state.tasks.allTasks);
+  const token = useSelector((state) => state.auth.token);
+
+  const getProjectNameById = (projectId) => {
+    const project = allProjects.find((p) => p._id === projectId);
+    return project ? project.projectName : "Unknown Project";
+  };
+
+  const getUserNameById = (userId) => {
+    const user = allUsers.find((u) => u._id === userId);
+    return user ? user.name : "Unassigned";
+  };
 
   const handleAddComment = async (commentText) => {
     try {
       const updatedComments = [...viewingTask.comments, commentText];
-      await axios.put(`http://localhost:5000/api/tasks/${viewingTask._id}`, {
-        comments: [...viewingTask.comments, commentText],
-      });
+
+      await axios.put(
+        `http://localhost:5000/api/tasks/${viewingTask._id}`,
+        {
+          comments: updatedComments, // or [commentText] if backend handles it properly
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // ✅ Include token here
+          },
+        }
+      );
 
       setViewingTask((prev) => ({
         ...prev,
         comments: updatedComments,
       }));
 
-      await fetchTasks();
+      dispatch(fetchTaskAssignments());
+      dispatch(fetchAllTasks());
     } catch (err) {
       console.error("Error adding comment:", err);
       alert("Failed to add comment.");
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewTask((prev) => ({ ...prev, [name]: value }));
+  const handleDragStart = (task) => {
+    setDraggedTask({ task });
   };
 
-  const handleSubmitTask = async () => {
-    try {
-      // Prepare task data (exclude creationTime)
-      const {
-        _id,
-        creationTime,
-        startedTime,
-        reviewTime,
-        completionTime,
-        ...taskData
-      } = newTask;
-
-      if (editMode && _id) {
-        // Update existing task
-        await axios.put(`http://localhost:5000/api/tasks/${_id}`, taskData);
-      } else {
-        // Create new task
-        console.log(taskData);
-        await axios.post(`http://localhost:5000/api/tasks`, taskData);
-      }
-      await fetchTasks();
-      // Reset modal and task form
-      setShowModal(false);
-      setEditMode(false);
-      setNewTask({
-        label: "",
-        title: "",
-        description: "",
-        priority: "Low",
-        category: "todo",
-      });
-      setEditingTask({ task: null, sourceSetter: null });
-    } catch (error) {
-      console.error("Error submitting task:", error);
-      alert("There was an error saving the task. Please check your input.");
-    }
-  };
-
-  // DRAG START
-  const handleDragStart = (task, source) => {
-    setDraggedTask({ task, source });
-    {
-      console.log("drag started");
-    }
-  };
-
-  // DROP LOGIC
   const handleDrop = async (targetCategory) => {
     if (!draggedTask) return;
 
@@ -108,24 +71,32 @@ export default function Tasks({ allTasks, fetchTasks, setDelCount }) {
       return;
     }
 
-    // Prepare time updates
-    const timeUpdate = {};
-    if (targetCategory === "inprogress" && !task.startedTime) {
-      timeUpdate.startedTime = new Date();
-    } else if (targetCategory === "underreview" && !task.reviewTime) {
-      timeUpdate.reviewTime = new Date();
-    } else if (targetCategory === "completed" && !task.completionTime) {
-      timeUpdate.completionTime = new Date();
-    }
-
     try {
-      await axios.put(`http://localhost:5000/api/tasks/${task._id}`, {
-        ...task,
-        category: targetCategory,
-        ...timeUpdate,
-      });
+      // Decode JWT to get the current user's ID
 
-      await fetchTasks(); // Refresh task list after updating
+      const decodedToken = jwtDecode(token);
+      const currentUserId = decodedToken.id; // or `decodedToken.userId` depending on your JWT payload
+
+      await axios.put(
+        `http://localhost:5000/api/tasks/${task._id}`,
+        {
+          category: targetCategory,
+          $push: {
+            statusHistory: {
+              status: targetCategory,
+              user: currentUserId,
+            },
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // ✅ include JWT token here
+          },
+        }
+      );
+
+      dispatch(fetchTaskAssignments());
+      dispatch(fetchAllTasks());
     } catch (err) {
       console.error("Failed to update task category:", err);
       alert("Failed to move task. Try again.");
@@ -145,16 +116,7 @@ export default function Tasks({ allTasks, fetchTasks, setDelCount }) {
         <button
           className={styles.createButton}
           onClick={() => {
-            setNewTask({
-              label: "",
-              title: "",
-              description: "",
-              priority: "Low",
-              category: "todo",
-            });
-            setEditMode(false);
-            setEditingTask({ task: null, sourceSetter: null });
-            setShowModal(true);
+            alert("You don't have permission to create tasks.");
           }}
         >
           <img src="/create.png" alt="create" />
@@ -185,28 +147,12 @@ export default function Tasks({ allTasks, fetchTasks, setDelCount }) {
                 onDragStart={() => handleDragStart(task)}
               >
                 <TaskCard
-                  label={task.label}
+                  project={getProjectNameById(task.project)}
                   title={task.title}
-                  description={task.description}
-                  creationTime={task.creationTime}
+                  userName={getUserNameById(task.user)}
                   priority={task.priority}
-                  onEdit={() => {
-                    setEditMode(true);
-                    setShowModal(true);
-                    setNewTask(task);
-                    setEditingTask({ task });
-                  }}
-                  onDelete={async () => {
-                    try {
-                      await axios.delete(
-                        `http://localhost:5000/api/tasks/${task._id}`
-                      );
-                      setDelCount((prev) => prev + 1);
-                      fetchTasks(); // Refresh after deletion
-                    } catch (err) {
-                      console.error("Error deleting task:", err);
-                    }
-                  }}
+                  dueDate={task.dueDate}
+                  creationTime={task.creationTime}
                   onFullView={() => setViewingTask(task)}
                 />
               </div>
@@ -228,29 +174,13 @@ export default function Tasks({ allTasks, fetchTasks, setDelCount }) {
                 onDragStart={() => handleDragStart(task)}
               >
                 <TaskCard
-                  label={task.label}
+                  project={getProjectNameById(task.project)}
                   title={task.title}
                   description={task.description}
-                  creationTime={task.creationTime}
+                  userName={getUserNameById(task.user)}
+                  dueDate={task.dueDate}
                   priority={task.priority}
-                  onEdit={() => {
-                    setEditMode(true);
-                    setShowModal(true);
-                    setNewTask(task);
-                    setEditingTask({ task });
-                  }}
-                  onDelete={async () => {
-                    try {
-                      await axios.delete(
-                        `http://localhost:5000/api/tasks/${task._id}`
-                      );
-                      setDelCount((prev) => prev + 1);
-
-                      fetchTasks(); // Refresh after deletion
-                    } catch (err) {
-                      console.error("Error deleting task:", err);
-                    }
-                  }}
+                  creationTime={task.creationTime}
                   onFullView={() => setViewingTask(task)}
                 />
               </div>
@@ -272,29 +202,13 @@ export default function Tasks({ allTasks, fetchTasks, setDelCount }) {
                 onDragStart={() => handleDragStart(task)}
               >
                 <TaskCard
-                  label={task.label}
+                  project={getProjectNameById(task.project)}
                   title={task.title}
                   description={task.description}
-                  creationTime={task.creationTime}
+                  userName={getUserNameById(task.user)}
                   priority={task.priority}
-                  onEdit={() => {
-                    setEditMode(true);
-                    setShowModal(true);
-                    setNewTask(task);
-                    setEditingTask({ task });
-                  }}
-                  onDelete={async () => {
-                    try {
-                      await axios.delete(
-                        `http://localhost:5000/api/tasks/${task._id}`
-                      );
-                      setDelCount((prev) => prev + 1);
-
-                      fetchTasks(); // Refresh after deletion
-                    } catch (err) {
-                      console.error("Error deleting task:", err);
-                    }
-                  }}
+                  dueDate={task.dueDate}
+                  creationTime={task.creationTime}
                   onFullView={() => setViewingTask(task)}
                 />
               </div>
@@ -316,11 +230,15 @@ export default function Tasks({ allTasks, fetchTasks, setDelCount }) {
                 onDragStart={() => handleDragStart(task)}
               >
                 <TaskCard
-                  label={task.label}
+                  project={getProjectNameById(task.project)}
                   title={task.title}
                   description={task.description}
-                  creationTime={task.creationTime}
+                  userName={getUserNameById(task.user)}
                   priority={task.priority}
+                  dueDate={task.dueDate}
+                  completedAt={task.completionTime}
+                  creationTime={task.creationTime}
+                  isCompleted={true}
                   onEdit={() => {
                     alert("Completed Tasks can not be Edited");
                   }}
@@ -334,32 +252,10 @@ export default function Tasks({ allTasks, fetchTasks, setDelCount }) {
         </div>
       </div>
 
-      {/* Task Modal */}
-      {showModal && (
-        <CreateTaskModal
-          operation={editMode ? "Edit Task" : "Create Task"}
-          newTask={newTask}
-          onChange={handleInputChange}
-          onClose={() => {
-            setShowModal(false);
-            setEditMode(false);
-            setEditingTask(null);
-          }}
-          onSubmit={handleSubmitTask}
-          onCloseTab={() => {
-            setShowModal(false);
-            setEditMode(false);
-            setEditingTask(null);
-          }}
-          operationButton={editMode ? "Save Changes" : "Add Task"}
-        />
-      )}
       {viewingTask && (
         <ViewTask
           task={viewingTask}
-          onCloseTab={() => {
-            setViewingTask(false);
-          }}
+          onCloseTab={() => setViewingTask(null)}
           onAddComment={handleAddComment}
         />
       )}

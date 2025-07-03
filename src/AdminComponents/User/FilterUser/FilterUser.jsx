@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
 import styles from "./FilterUser.module.css";
 import Select from "react-select";
-
-export default function FilterUser({
-  allUsers,
-  setFilteredUsers,
-  onCloseTab,
-  taskAssignments,
-  allProjects,
-}) {
+import { useSelector } from "react-redux";
+export default function FilterUser({ setFilteredUsers, onCloseTab }) {
+  const allUsers = useSelector((state) => state.users.allUsers);
+  const allProjects = useSelector((state) => state.projects.allProjects);
+  const taskAssignments = useSelector(
+    (state) => state.taskAssignments.assignments
+  );
   const [showRoleFilter, setShowRoleFilter] = useState(false);
   const [selectedRoles, setSelectedRoles] = useState([]);
   const [selectedProjects, setSelectedProjects] = useState([]);

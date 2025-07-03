@@ -68,4 +68,25 @@ progress {
 .progressCard {
   width: 30%;
   background-color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.compProj,
+.newProj,
+.progProj {
+  display: flex;
+  gap: 20px;
+  /* background-color: #d9f275; */
+  justify-content: flex-start;
+  align-items: center;
+  padding: 10px 20px;
+  border-radius: 15px;
+}
+
+.compProj img,
+.newProj img,
+.progProj img {
+  height: 30px;
 }

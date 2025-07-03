@@ -92,8 +92,9 @@
 
 .headData {
   display: flex;
-  gap: 50px;
+
   align-items: first baseline;
+  justify-content: space-between;
 }
 
 .projectData,
@@ -114,7 +115,7 @@
 }
 
 .tasksOfProject {
-  margin-left: 60px;
+  /* margin-left: 60px; */
   font-size: 20px;
 }
 
@@ -129,7 +130,7 @@
 }
 
 .tasksOfProject ul {
-  margin-left: 60px;
+  margin-left: 10px;
 }
 
 .futureData {
@@ -155,4 +156,9 @@ ul {
 .dueTask {
   margin-left: 30px;
   margin-top: 10px;
+}
+
+.projInfo {
+  display: flex;
+  gap: 25px;
 }

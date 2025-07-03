@@ -1,12 +1,19 @@
 import React from "react";
 import styles from "./Profile.module.css";
-import { useAuth } from "../../contexts/AuthContext";
 import { jwtDecode } from "jwt-decode";
 import { useState } from "react";
 import CreateOrEditUser from "../User/CreateUser/CreateOrEditUser";
+import { useSelector, useDispatch } from "react-redux";
+import { hasPermission } from "../../App/Utility/permission";
 
-export default function Profile({ allUsers, allTasks, allProjects }) {
-  const { auth } = useAuth();
+export default function Profile() {
+  const permissions = useSelector((state) => state.auth.permissions);
+  const allProjects = useSelector((state) => state.projects.allProjects);
+  const allTasks = useSelector((state) => state.tasks.allTasks);
+  const allUsers = useSelector((state) => state.users.allUsers);
+  const [editMode, setEditMode] = useState(null); // "edit" or "password"
+
+  const auth = useSelector((state) => state.auth);
   const [showEditProfile, setShowEditProfile] = useState(false);
   if (!auth?.token) {
     return <div className={styles.profileContainer}>Not logged in.</div>;
@@ -143,15 +150,36 @@ export default function Profile({ allUsers, allTasks, allProjects }) {
 
         <button
           className={styles.editProfileButton}
-          onClick={() => setShowEditProfile(true)}
+          onClick={() => {
+            if (!hasPermission(permissions, "Profile", "edit")) {
+              alert("You do not have permission to edit your profile.");
+              return;
+            }
+            setEditMode("edit");
+            setShowEditProfile(true);
+          }}
         >
           Edit Profile
+        </button>
+
+        <button
+          className={styles.editProfileButton}
+          onClick={() => {
+            if (!hasPermission(permissions, "Profile", "edit")) {
+              alert("You do not have permission to change the password.");
+              return;
+            }
+            setEditMode("password");
+            setShowEditProfile(true);
+          }}
+        >
+          Change Password
         </button>
       </div>
       {showEditProfile && (
         <CreateOrEditUser
           editUser={user}
-          fetchUsers={() => {}} // or pass a refetch function if needed
+          mode={editMode}
           onCloseTab={() => setShowEditProfile(false)}
         />
       )}

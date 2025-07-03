@@ -1,5 +1,5 @@
 .taskCard {
-  background-color: white;
+  background-color: #201f32;
   border-radius: 20px;
   padding: 10px;
   display: flex;
@@ -12,7 +12,7 @@
 }
 
 .taskCardTop {
-  background-color: aliceblue;
+  background-color: #acc8e5;
   color: #201f32;
   display: flex;
   height: 30px;
@@ -28,8 +28,8 @@
 }
 
 .viewTask {
-  background-color: #201f32;
-  color: aliceblue;
+  background-color: aliceblue;
+  color: #201f32;
   border: none;
   padding: 3px 10px;
   border-radius: 15px;
@@ -37,10 +37,17 @@
   font-size: 10px;
   display: flex;
   align-items: center;
+  max-height: 30px;
+
+  font-weight: bold;
+}
+
+.taskCard h3 {
+  color: aliceblue;
 }
 
 .taskCardBottom {
-  background-color: #201f32;
+  background-color: #acc8e5;
   display: flex;
   height: 30px;
   align-items: center;
@@ -50,8 +57,9 @@
 }
 
 .creationTime p {
-  color: aliceblue;
+  color: #201f32;
   font-size: 15px;
+  font-weight: bold;
 }
 
 .priority {
@@ -62,6 +70,7 @@
   align-items: center;
   font-weight: bold;
   text-align: center;
+  border: 1px solid black;
 }
 
 /* Priority colors */

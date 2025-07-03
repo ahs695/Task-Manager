@@ -1,16 +1,19 @@
 import React, { useState } from "react";
 import styles from "./CreateUser.module.css";
-import { useAuth } from "../../../contexts/AuthContext";
 import axios from "axios";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchAllUsers } from "../../../Redux/Users/userAPI";
 
 export default function CreateOrEditUser({
-  fetchUsers,
   onCloseTab,
   editUser = null,
+  mode = "edit",
 }) {
-  const { auth } = useAuth();
-
+  const auth = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const isCreateMode = mode === "create";
   const isEdit = Boolean(editUser);
+  const isPasswordMode = mode === "password";
 
   const [form, setForm] = useState({
     name: editUser?.name || "",
@@ -55,24 +58,25 @@ export default function CreateOrEditUser({
     }
 
     try {
-      if (isEdit) {
+      if (isPasswordMode) {
+        if (form.password !== form.confirmPassword) {
+          alert("Passwords do not match");
+          return;
+        }
+
         await axios.put(
           `http://localhost:5000/api/auth/${editUser._id}`,
-          {
-            name: form.name,
-            role: selectedRole,
-            ...(showPasswordFields && form.password
-              ? { password: form.password }
-              : {}),
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${auth.token}`,
-            },
-          }
+          { password: form.password },
+          { headers: { Authorization: `Bearer ${auth.token}` } }
         );
-        alert("User updated successfully!");
-      } else {
+
+        alert("Password changed successfully!");
+      } else if (isCreateMode) {
+        if (form.password !== form.confirmPassword) {
+          alert("Passwords do not match");
+          return;
+        }
+
         await axios.post(
           "http://localhost:5000/api/auth/create-user",
           {
@@ -88,9 +92,23 @@ export default function CreateOrEditUser({
           }
         );
         alert("User created successfully!");
+      } else if (isEditMode) {
+        await axios.put(
+          `http://localhost:5000/api/auth/${editUser._id}`,
+          {
+            name: form.name,
+            role: selectedRole,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${auth.token}`,
+            },
+          }
+        );
+        alert("User updated successfully!");
       }
 
-      fetchUsers();
+      dispatch(fetchAllUsers());
       onCloseTab();
     } catch (err) {
       console.error(err);
@@ -120,97 +138,14 @@ export default function CreateOrEditUser({
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2>{isEdit ? "Edit User" : "Create New User"}</h2>
+        <div className={styles.profHeading}>
+          <h2>{isEdit ? "Edit User" : "Create New User"}</h2>
+        </div>
         <form onSubmit={handleSubmit} className={styles.form}>
-          {isEdit ? (
-            showPasswordFields ? (
-              <>
-                <label>
-                  New Password:
-                  <input
-                    type="password"
-                    name="password"
-                    value={form.password}
-                    onChange={handleChange}
-                  />
-                </label>
-                <label>
-                  Confirm Password:
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    value={form.confirmPassword}
-                    onChange={handleChange}
-                  />
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setShowPasswordFields(false)}
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <>
-                <label>
-                  Name:
-                  <input
-                    type="text"
-                    name="name"
-                    value={form.name}
-                    onChange={handleChange}
-                    required
-                  />
-                </label>
-
-                <label>
-                  Role:
-                  <select name="role" value={form.role} onChange={handleChange}>
-                    {roleOptions.map((r) => (
-                      <option key={r} value={r}>
-                        {r}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                {form.role === "custom" && (
-                  <label>
-                    Custom Role:
-                    <input
-                      type="text"
-                      name="customRole"
-                      value={form.customRole}
-                      onChange={handleChange}
-                      required
-                    />
-                  </label>
-                )}
-
-                <label>
-                  Email:
-                  <input
-                    type="email"
-                    name="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    required
-                    disabled
-                  />
-                </label>
-
-                <button
-                  type="button"
-                  onClick={() => setShowPasswordFields(true)}
-                >
-                  Change Password
-                </button>
-              </>
-            )
-          ) : (
+          {isPasswordMode ? (
             <>
               <label>
-                Password:
+                New Password:
                 <input
                   type="password"
                   name="password"
@@ -229,6 +164,80 @@ export default function CreateOrEditUser({
                   required
                 />
               </label>
+            </>
+          ) : (
+            <>
+              <label>
+                Name:
+                <input
+                  type="text"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  required
+                />
+              </label>
+
+              <label>
+                Role:
+                <select name="role" value={form.role} onChange={handleChange}>
+                  {roleOptions.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              {form.role === "custom" && (
+                <label>
+                  Custom Role:
+                  <input
+                    type="text"
+                    name="customRole"
+                    value={form.customRole}
+                    onChange={handleChange}
+                    required
+                  />
+                </label>
+              )}
+
+              <label>
+                Email:
+                <input
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                  disabled={editUser} //
+                />
+              </label>
+
+              {isCreateMode && (
+                <>
+                  <label>
+                    Password:
+                    <input
+                      type="password"
+                      name="password"
+                      value={form.password}
+                      onChange={handleChange}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Confirm Password:
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      value={form.confirmPassword}
+                      onChange={handleChange}
+                      required
+                    />
+                  </label>
+                </>
+              )}
             </>
           )}
 

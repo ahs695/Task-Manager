@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from "react";
 import styles from "./ProjectFilter.module.css";
 import Select from "react-select";
+import { useSelector, useDispatch } from "react-redux";
 
-export default function ProjectFilter({
-  allProjects,
-  taskAssignments,
-  allUsers,
-  setFilteredProjects,
-  onCloseTab,
-}) {
+export default function ProjectFilter({ setFilteredProjects, onCloseTab }) {
+  const allUsers = useSelector((state) => state.users.allUsers);
+  const taskAssignments = useSelector(
+    (state) => state.taskAssignments.assignments
+  );
   const [showUser, setShowUser] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
-
+  const allProjects = useSelector((state) => state.projects.allProjects);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [selectedStatuses, setSelectedStatuses] = useState([]);
 

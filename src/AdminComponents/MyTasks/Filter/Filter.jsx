@@ -1,21 +1,19 @@
 import React, { useState, useEffect } from "react";
 import styles from "./Filter.module.css";
 import Select from "react-select";
+import { useSelector, useDispatch } from "react-redux";
 
-export default function Filter({
-  allTasks,
-  setFilteredTasks,
-  onCloseTab,
-  taskAssignments,
-  allProjects,
-  allUsers,
-}) {
-  // Toggle filter group visibility
+export default function Filter({ setFilteredTasks, onCloseTab }) {
+  const allTasks = useSelector((state) => state.tasks.allTasks);
+  const taskAssignments = useSelector(
+    (state) => state.taskAssignments.assignments
+  );
   const [showCategory, setShowCategory] = useState(false);
   const [showPriority, setShowPriority] = useState(false);
   const [showProject, setShowProject] = useState(false);
   const [showUser, setShowUser] = useState(false);
-
+  const allProjects = useSelector((state) => state.projects.allProjects);
+  const allUsers = useSelector((state) => state.users.allUsers);
   // Selected values
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedPriorities, setSelectedPriorities] = useState([]);

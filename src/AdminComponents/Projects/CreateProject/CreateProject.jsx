@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "./CreateProject.module.css";
-
+import { useDispatch } from "react-redux";
+import { fetchAllProjects } from "../../../Redux/Projects/projectAPI";
 export default function CreateProject({
   onCloseTab,
-  fetchProjects,
+
   existingProject,
 }) {
+  const dispatch = useDispatch();
   const [projectName, setProjectName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -44,7 +46,7 @@ export default function CreateProject({
         alert("Project created successfully!");
       }
 
-      fetchProjects();
+      dispatch(fetchAllProjects());
       onCloseTab();
     } catch (err) {
       console.error(err);
@@ -62,7 +64,7 @@ export default function CreateProject({
         `http://localhost:5000/api/projects/${existingProject._id}/complete`
       );
       alert("Project marked as complete.");
-      fetchProjects();
+      dispatch(fetchAllProjects());
       onCloseTab();
     } catch (err) {
       console.error(err);

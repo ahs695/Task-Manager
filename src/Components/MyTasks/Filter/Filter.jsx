@@ -1,42 +1,41 @@
 import React, { useState, useEffect } from "react";
 import styles from "./Filter.module.css";
+import Select from "react-select";
+import { useSelector, useDispatch } from "react-redux";
 
-export default function Filter({ allTasks, setFilteredTasks, onCloseTab }) {
-  // Toggle filter group visibility
-  const [showCategory, setShowCategory] = useState(false);
-  const [showLabel, setShowLabel] = useState(false);
+export default function Filter({ setFilteredTasks, onCloseTab }) {
+  const allTasks = useSelector((state) => state.tasks.allTasks);
+  const taskAssignments = useSelector(
+    (state) => state.taskAssignments.assignments
+  );
+
   const [showPriority, setShowPriority] = useState(false);
+  const [showProject, setShowProject] = useState(false);
+
+  const allProjects = useSelector((state) => state.projects.allProjects);
 
   // Selected values
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedLabels, setSelectedLabels] = useState([]);
-  const [selectedPriorities, setSelectedPriorities] = useState([]);
 
-  const allCategories = [...new Set(allTasks.map((task) => task.category))];
-  const allLabels = [...new Set(allTasks.map((task) => task.label))];
+  const [selectedPriorities, setSelectedPriorities] = useState([]);
+  const [selectedProjects, setSelectedProjects] = useState([]);
+
   const allPriorities = [...new Set(allTasks.map((task) => task.priority))];
+  const allProjectOptions = allProjects.map((proj) => ({
+    id: proj._id,
+    name: proj.projectName,
+  }));
 
   const handleOverlayClick = () => {
-    onCloseTab(); // Close when clicking on overlay
+    onCloseTab();
   };
 
   const stopPropagation = (e) => {
-    e.stopPropagation(); // Prevent click from reaching overlay
+    e.stopPropagation();
   };
 
   // Filter logic
   useEffect(() => {
     let filtered = [...allTasks];
-
-    if (selectedCategories.length > 0) {
-      filtered = filtered.filter((task) =>
-        selectedCategories.includes(task.category)
-      );
-    }
-
-    if (selectedLabels.length > 0) {
-      filtered = filtered.filter((task) => selectedLabels.includes(task.label));
-    }
 
     if (selectedPriorities.length > 0) {
       filtered = filtered.filter((task) =>
@@ -44,84 +43,31 @@ export default function Filter({ allTasks, setFilteredTasks, onCloseTab }) {
       );
     }
 
+    if (selectedProjects.length > 0) {
+      const projectTaskIds = taskAssignments
+        .filter((a) =>
+          selectedProjects.includes(a.projectId?._id || a.projectId)
+        )
+        .map((a) => a.taskId._id || a.taskId);
+      filtered = filtered.filter((task) => projectTaskIds.includes(task._id));
+    }
+
     setFilteredTasks(filtered);
   }, [
-    selectedCategories,
-    selectedLabels,
     selectedPriorities,
+    selectedProjects,
     allTasks,
+    taskAssignments,
     setFilteredTasks,
   ]);
-
-  // Handlers
-  const toggleSelected = (value, listSetter, list) => {
-    listSetter(
-      list.includes(value)
-        ? list.filter((item) => item !== value)
-        : [...list, value]
-    );
-  };
 
   return (
     <div className={styles.filterOverlay} onClick={handleOverlayClick}>
       <div className={styles.filterModal} onClick={stopPropagation}>
-        <h3>Filter Tasks</h3>
-
-        {/* Category */}
-        <div className={styles.filterSection}>
-          <label className={styles.categ}>
-            <input
-              type="checkbox"
-              checked={showCategory}
-              onChange={() => setShowCategory(!showCategory)}
-            />
-            Category
-          </label>
-          {showCategory &&
-            allCategories.map((cat) => (
-              <div key={cat} className={styles.subOption}>
-                <input
-                  type="checkbox"
-                  checked={selectedCategories.includes(cat)}
-                  onChange={() =>
-                    toggleSelected(
-                      cat,
-                      setSelectedCategories,
-                      selectedCategories
-                    )
-                  }
-                />
-                <label>{cat}</label>
-              </div>
-            ))}
+        <div className={styles.filterHeader}>
+          <h3>Filter Tasks</h3>
         </div>
 
-        {/* Label */}
-        <div className={styles.filterSection}>
-          <label className={styles.categ}>
-            <input
-              type="checkbox"
-              checked={showLabel}
-              onChange={() => setShowLabel(!showLabel)}
-            />
-            Label
-          </label>
-          {showLabel &&
-            allLabels.map((label) => (
-              <div key={label} className={styles.subOption}>
-                <input
-                  type="checkbox"
-                  checked={selectedLabels.includes(label)}
-                  onChange={() =>
-                    toggleSelected(label, setSelectedLabels, selectedLabels)
-                  }
-                />
-                <label>{label}</label>
-              </div>
-            ))}
-        </div>
-
-        {/* Priority */}
         <div className={styles.filterSection}>
           <label className={styles.categ}>
             <input
@@ -131,25 +77,64 @@ export default function Filter({ allTasks, setFilteredTasks, onCloseTab }) {
             />
             Priority
           </label>
-          {showPriority &&
-            allPriorities.map((priority) => (
-              <div key={priority} className={styles.subOption}>
-                <input
-                  type="checkbox"
-                  checked={selectedPriorities.includes(priority)}
-                  onChange={() =>
-                    toggleSelected(
-                      priority,
-                      setSelectedPriorities,
-                      selectedPriorities
-                    )
-                  }
-                />
-                <label>{priority}</label>
-              </div>
-            ))}
+          {showPriority && (
+            <div className={styles.filterOptions}>
+              {allPriorities.map((priority) => (
+                <label key={priority} className={styles.filterOption}>
+                  <input
+                    type="checkbox"
+                    checked={selectedPriorities.includes(priority)}
+                    onChange={() =>
+                      toggleSelected(
+                        priority,
+                        setSelectedPriorities,
+                        selectedPriorities
+                      )
+                    }
+                  />
+                  {priority}
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className={styles.filterSection}>
+          <label className={styles.categ}>
+            <input
+              type="checkbox"
+              checked={showProject}
+              onChange={() => setShowProject(!showProject)}
+            />
+            Project
+          </label>
+          {showProject && (
+            <Select
+              isMulti
+              options={allProjectOptions.map((proj) => ({
+                value: proj.id,
+                label: proj.name,
+              }))}
+              value={selectedProjects.map((id) => {
+                const proj = allProjectOptions.find((p) => p.id === id);
+                return { value: id, label: proj?.name || id };
+              })}
+              onChange={(selectedOptions) =>
+                setSelectedProjects(selectedOptions.map((opt) => opt.value))
+              }
+              className={styles.multiSelectDropdown}
+            />
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+function toggleSelected(value, setter, current) {
+  setter(
+    current.includes(value)
+      ? current.filter((item) => item !== value)
+      : [...current, value]
   );
 }

@@ -3,15 +3,21 @@ import styles from "./Callender.module.css";
 import DateBox from "./DateBox/DateBox";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useSelector } from "react-redux";
 
-export default function Callender({ allTasks, allProjects, taskAssignments }) {
+export default function Callender() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-
+  const allTasks = useSelector((state) => state.tasks.allTasks);
+  const allProjects = useSelector((state) => state.projects.allProjects);
+  const taskAssignments = useSelector(
+    (state) => state.taskAssignments.assignments
+  );
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [selectedDate, setSelectedDate] = useState(today);
+  const datePickerRef = useRef(null);
 
   const datesContainerRef = useRef(null);
   const todayBoxRef = useRef(null);
@@ -91,7 +97,6 @@ export default function Callender({ allTasks, allProjects, taskAssignments }) {
   const getProjectTasks = (project) => {
     const projectIdStr = project._id.toString();
 
-    // Handle populated taskAssignments (from backend .populate())
     const taskIds = taskAssignments
       .filter((ta) => {
         // Check populated projectId object
@@ -109,6 +114,25 @@ export default function Callender({ allTasks, allProjects, taskAssignments }) {
         task.category?.toLowerCase().trim() !== "completed"
     );
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        datePickerRef.current &&
+        !datePickerRef.current.contains(event.target)
+      ) {
+        setShowDatePicker(false);
+      }
+    };
+
+    if (showDatePicker) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDatePicker]);
 
   useEffect(() => {
     if (todayBoxRef.current && datesContainerRef.current) {
@@ -136,6 +160,7 @@ export default function Callender({ allTasks, allProjects, taskAssignments }) {
 
           {showDatePicker && (
             <div
+              ref={datePickerRef}
               style={{
                 position: "absolute",
                 zIndex: 9999,
@@ -205,22 +230,24 @@ export default function Callender({ allTasks, allProjects, taskAssignments }) {
             <h1>
               {selectedDate.getDate()} {monthName} {selectedDate.getFullYear()}:
             </h1>
-            <p className={styles.projectStats}>
-              Created :{" "}
-              {
-                allProjects.filter((p) =>
-                  isSameDay(new Date(p.creationTime), selectedDate)
-                ).length
-              }{" "}
-            </p>
-            <p className={styles.projectStats}>
-              Completed :{" "}
-              {
-                allProjects.filter((p) =>
-                  isSameDay(new Date(p.completionTime), selectedDate)
-                ).length
-              }{" "}
-            </p>
+            <div className={styles.projInfo}>
+              <p className={styles.projectStats}>
+                Created :{" "}
+                {
+                  allProjects.filter((p) =>
+                    isSameDay(new Date(p.creationTime), selectedDate)
+                  ).length
+                }{" "}
+              </p>
+              <p className={styles.projectStats}>
+                Completed :{" "}
+                {
+                  allProjects.filter((p) =>
+                    isSameDay(new Date(p.completionTime), selectedDate)
+                  ).length
+                }{" "}
+              </p>
+            </div>
           </div>
           {futureOnly ? (
             <>
@@ -293,21 +320,19 @@ export default function Callender({ allTasks, allProjects, taskAssignments }) {
                     {/* ✅ Only render if tasks exist */}
                     {tasksCreatedToday.length > 0 && (
                       <div className={styles.tasksToday}>
-                        <p>Tasks Created Today:</p>
                         <ul>
                           {tasksCreatedToday.map((t) => (
-                            <li key={t._id}>{t.title}</li>
-                          ))}
+                            <li key={t._id}>{t.title} (new)</li>
+                          ))}{" "}
                         </ul>
                       </div>
                     )}
 
                     {tasksDueToday.length > 0 && (
                       <div className={styles.dueTask}>
-                        <p>Tasks Due Today:</p>
                         <ul>
                           {tasksDueToday.map((t) => (
-                            <li key={t._id}>{t.title}</li>
+                            <li key={t._id}>{t.title} (due today)</li>
                           ))}
                         </ul>
                       </div>

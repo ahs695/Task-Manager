@@ -2,6 +2,7 @@ import React from "react";
 import styles from "./Cards.module.css";
 import Chart from "react-apexcharts";
 import { format, subDays, isSameDay } from "date-fns";
+import { useSelector } from "react-redux";
 
 export default function Cards({
   toDoCount,
@@ -9,9 +10,9 @@ export default function Cards({
   underReviewCount,
   completedCount,
   delCount,
-  allProjects,
-  allTasks,
 }) {
+  const allTasks = useSelector((state) => state.tasks.allTasks);
+  const allProjects = useSelector((state) => state.projects.allProjects);
   const today = new Date();
   const last7Days = [...Array(7).keys()].map((i) => subDays(today, 6 - i));
 

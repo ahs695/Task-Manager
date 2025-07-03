@@ -6,6 +6,7 @@ import {
   Outlet,
   Navigate,
 } from "react-router-dom";
+import store from "./App/store";
 import Login from "./Components/Login/Login";
 import Register from "./Components/Register/Register";
 import Dashboard from "./Components/Dashboard/Dashboard";
@@ -13,18 +14,17 @@ import Home from "./Components/Home/Home";
 import Header from "./Components/Header/header";
 import Footer from "./Components/Footer/Footer";
 import AdminDashboard from "./AdminComponents/AdminDashboard/AdminDashboard";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { useSelector } from "react-redux";
+import { Provider } from "react-redux";
 
-// ProtectedRoute component
 function ProtectedRoute({ allowedRoles }) {
-  const { auth } = useAuth();
+  const { isAuthenticated, role } = useSelector((state) => state.auth);
 
-  if (!auth.isAuthenticated) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  console.log("auth.role after: ", auth.role);
-  if (!allowedRoles.includes(auth.role)) {
-    console.log("auth.role :", auth.role);
+
+  if (!allowedRoles.includes(role)) {
     return <Navigate to="/" replace />;
   }
 
@@ -53,7 +53,9 @@ function AppContent() {
 
         {/* Protected Route for admins */}
         <Route
-          element={<ProtectedRoute allowedRoles={["admin", "superAdmin"]} />}
+          element={
+            <ProtectedRoute allowedRoles={["admin", "superAdmin", "staff"]} />
+          }
         >
           <Route path="/admin-dashboard/*" element={<AdminDashboard />} />
         </Route>
@@ -65,11 +67,11 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
+    <Provider store={store}>
       <Router>
         <AppContent />
       </Router>
-    </AuthProvider>
+    </Provider>
   );
 }
 

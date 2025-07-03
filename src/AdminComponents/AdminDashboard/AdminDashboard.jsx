@@ -9,73 +9,36 @@ import Settings from "../SettingsPage/Settings";
 import Timeline from "../Timeline/Timeline";
 import Projects from "../Projects/Projects";
 import User from "../User/User";
-
+import MySettings from "../SettingsPage/MySettings";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAllTasks } from "../../Redux/Tasks/taskAPI";
+import { fetchAllProjects } from "../../Redux/Projects/projectAPI";
+import { fetchAllUsers } from "../../Redux/Users/userAPI";
+import { fetchTaskAssignments } from "../../Redux/TaskAssignments/taskAssignmentAPI";
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import ProtectedRoute from "../../App/Utility/ProtectedRoute";
 
 function Dashboard() {
-  const [allTasks, setAllTasks] = useState([]);
-  const [toDoTasks, setToDoTasks] = useState([]);
-  const [inProgressTasks, setInProgressTasks] = useState([]);
-  const [underReviewTasks, setUnderReviewTasks] = useState([]);
-  const [completedTasks, setCompletedTasks] = useState([]);
-  const [allUsers, setAllUsers] = useState([]);
-  const [allProjects, setAllProjects] = useState([]);
-  const [taskAssignments, setTaskAssignments] = useState([]);
-
-  const fetchTasks = async () => {
-    try {
-      const taskRes = await axios.get("http://localhost:5000/api/tasks");
-      const tasks = taskRes.data;
-      setAllTasks(tasks);
-
-      // Categorize tasks
-      setToDoTasks(tasks.filter((task) => task.category === "todo"));
-      setInProgressTasks(
-        tasks.filter((task) => task.category === "inprogress")
-      );
-      setUnderReviewTasks(
-        tasks.filter((task) => task.category === "underreview")
-      );
-      setCompletedTasks(tasks.filter((task) => task.category === "completed"));
-
-      const assignmentRes = await axios.get(
-        "http://localhost:5000/api/task-assignments"
-      );
-      setTaskAssignments(assignmentRes.data);
-    } catch (err) {
-      console.error("Failed to load tasks or assignments", err);
-    }
-  };
-
-  const fetchUsers = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/auth"); // Update route if needed
-      setAllUsers(res.data);
-      {
-        console.log(res);
-      }
-    } catch (err) {
-      console.error("Failed to load users", err);
-    }
-  };
-  const fetchProjects = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/projects");
-      setAllProjects(res.data);
-      {
-        console.log(res);
-      }
-    } catch (err) {
-      console.error("Failed to load projects", err);
-    }
-  };
+  const dispatch = useDispatch();
+  const { allTasks, status, error } = useSelector((state) => state.tasks);
 
   useEffect(() => {
-    fetchTasks();
-    fetchUsers();
-    fetchProjects();
-  }, []);
+    dispatch(fetchAllTasks());
+    dispatch(fetchAllProjects());
+    dispatch(fetchAllUsers());
+    dispatch(fetchTaskAssignments());
+  }, [dispatch]);
+
+  const toDoTasks = allTasks.filter((task) => task.category === "todo");
+  const inProgressTasks = allTasks.filter(
+    (task) => task.category === "inprogress"
+  );
+  const underReviewTasks = allTasks.filter(
+    (task) => task.category === "underreview"
+  );
+  const completedTasks = allTasks.filter(
+    (task) => task.category === "completed"
+  );
 
   return (
     <div className={styles.content}>
@@ -84,79 +47,73 @@ function Dashboard() {
         <Route
           path="info"
           element={
-            <Info
-              toDoTasks={toDoTasks}
-              setToDoTasks={setToDoTasks}
-              inProgressTasks={inProgressTasks}
-              setInProgressTasks={setInProgressTasks}
-              underReviewTasks={underReviewTasks}
-              setUnderReviewTasks={setUnderReviewTasks}
-              completedTasks={completedTasks}
-              setCompletedTasks={setCompletedTasks}
-              allTasks={allTasks}
-              fetchTasks={fetchTasks}
-              allUsers={allUsers}
-              allProjects={allProjects}
-            />
+            <ProtectedRoute resource="Dashboard">
+              <Info
+                toDoTasks={toDoTasks}
+                inProgressTasks={inProgressTasks}
+                underReviewTasks={underReviewTasks}
+                completedTasks={completedTasks}
+              />
+            </ProtectedRoute>
           }
         />
         <Route
           path="callender"
           element={
-            <Callender
-              allTasks={allTasks}
-              allProjects={allProjects}
-              taskAssignments={taskAssignments}
-            />
+            <ProtectedRoute resource="Calendar">
+              <Callender />
+            </ProtectedRoute>
           }
         />
         <Route
           path="myTasks"
           element={
-            <MyTasks
-              allTasks={allTasks}
-              allUsers={allUsers}
-              fetchTasks={fetchTasks}
-              allProjects={allProjects}
-              taskAssignments={taskAssignments}
-            />
+            <ProtectedRoute resource="Task">
+              <MyTasks />
+            </ProtectedRoute>
           }
         />
-        <Route path="timeline" element={<Timeline allTasks={allTasks} />} />
+        <Route
+          path="timeline"
+          element={
+            <ProtectedRoute resource="Timeline">
+              <Timeline />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="profile"
           element={
-            <Profile
-              allUsers={allUsers}
-              allTasks={allTasks}
-              allProjects={allProjects}
-            />
+            <ProtectedRoute resource="Profile">
+              <Profile />
+            </ProtectedRoute>
           }
         />
         <Route
           path="projects"
           element={
-            <Projects
-              allProjects={allProjects}
-              fetchProjects={fetchProjects}
-              allUsers={allUsers}
-              allTasks={allTasks}
-              taskAssignments={taskAssignments}
-            />
+            <ProtectedRoute resource="Project">
+              <Projects />
+            </ProtectedRoute>
           }
         />
         <Route
           path="User"
           element={
-            <User
-              allUsers={allUsers}
-              fetchUsers={fetchUsers}
-              allProjects={allProjects}
-              taskAssignments={taskAssignments}
-            />
+            <ProtectedRoute resource="User">
+              <User />
+            </ProtectedRoute>
           }
         />
-        <Route path="Settings" element={<Settings />} />
+        <Route path="settings" element={<MySettings />} />
+        <Route
+          path="org-settings"
+          element={
+            <ProtectedRoute resource="Setting">
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </div>
   );

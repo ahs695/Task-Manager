@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styles from "./CreateTask.module.css";
-
+import { useSelector } from "react-redux";
 export default function CreateTaskModal({
   operation,
   newTask,
@@ -9,11 +9,10 @@ export default function CreateTaskModal({
   onSubmit,
   onCloseTab,
   operationButton,
-  allUsers,
-  allProjects,
-  allTasks,
 }) {
+  const allProjects = useSelector((state) => state.projects.allProjects);
   const [showCustomLabel, setShowCustomLabel] = useState(false);
+  const allUsers = useSelector((state) => state.users.allUsers);
 
   const handleOverlayClick = () => {
     onCloseTab(); // Close when clicking on overlay

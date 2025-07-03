@@ -35,6 +35,22 @@
   font-size: 16px;
 }
 
+.userOption input {
+  width: 160px;
+  background: none;
+  border: none;
+  color: aliceblue;
+}
+
+.userOption input::placeholder {
+  color: aliceblue;
+  font-size: 16px;
+}
+
+.userOption input:focus {
+  outline: none;
+}
+
 .userTable {
   width: 100%;
   border-collapse: collapse;

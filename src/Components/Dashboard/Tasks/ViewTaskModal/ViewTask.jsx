@@ -1,45 +1,73 @@
 import React, { useState } from "react";
 import styles from "./ViewTask.module.css";
+import { useSelector } from "react-redux";
+import { jwtDecode } from "jwt-decode";
 
 export default function ViewTask({ task, onCloseTab, onAddComment }) {
+  const allProjects = useSelector((state) => state.projects.allProjects);
+  const allUsers = useSelector((state) => state.users.allUsers);
+  const token = useSelector((state) => state.auth.token); // ✅ Get token from Redux
+
   const [newComment, setNewComment] = useState("");
+  const [closing, setClosing] = useState(false);
+
+  const currentUserId = token ? jwtDecode(token)?.id : null; // ✅ Decode ID from token
 
   const handleAddComment = () => {
     if (newComment.trim()) {
-      onAddComment(newComment.trim());
+      const commentObject = {
+        text: newComment.trim(),
+        time: new Date(),
+        user: currentUserId,
+      };
+      onAddComment(commentObject);
       setNewComment("");
     }
   };
 
   const handleOverlayClick = () => {
-    onCloseTab(); // Close when clicking on overlay
+    setClosing(true);
+    setTimeout(() => {
+      onCloseTab(); // Only call after animation ends
+    }, 600);
   };
 
-  const stopPropagation = (e) => {
-    e.stopPropagation(); // Prevent click from reaching overlay
-  };
+  const stopPropagation = (e) => e.stopPropagation();
+
+  const projectObj = allProjects.find((proj) => proj._id === task.project);
+  const projectName = projectObj ? projectObj.projectName : "N/A";
+  const userObj = allUsers.find((u) => u._id === task.user);
+  const userName = userObj ? userObj.name : "Unassigned";
 
   return (
     <div className={styles.viewTaskOverlay} onClick={handleOverlayClick}>
-      <div className={styles.viewTask} onClick={stopPropagation}>
+      <div
+        className={`${styles.viewTask} ${
+          closing ? styles.slideOut : styles.slideIn
+        }`}
+        onClick={stopPropagation}
+      >
         <h2 className={styles.taskTitle}>{task.title}</h2>
         <div className={styles.taskData}>
           <p>
-            <strong>Label:</strong> {task.label}
-          </p>
-          <p>
-            <strong>Description:</strong> {task.description}
-          </p>
-          <p>
-            <strong>Priority:</strong> {task.priority}
-          </p>
-          <p>
-            <strong>Category:</strong> {task.category}
-          </p>
-          <p>
-            <strong>Created:</strong>{" "}
+            <strong>{projectName}</strong> ({userName}) <br />
             {new Date(task.creationTime).toLocaleString()}
           </p>
+
+          <p>{task.description}</p>
+
+          <p className={styles.deadline}>
+            <strong>Deadline:</strong> {new Date(task.dueDate).toLocaleString()}{" "}
+            {task.priority === "High" && (
+              <img src="/cautionhigh.png" alt="High" />
+            )}
+            {task.priority === "Mid" && <img src="/cautionmid.png" alt="Mid" />}
+            {task.priority === "Low" && (
+              <img src="/cautionlow.png" alt="Low" />
+            )}{" "}
+            ({task.category})
+          </p>
+
           {task.startedTime && (
             <p>
               <strong>Started:</strong>{" "}
@@ -48,13 +76,13 @@ export default function ViewTask({ task, onCloseTab, onAddComment }) {
           )}
           {task.reviewTime && (
             <p>
-              <strong>In Review:</strong>{" "}
+              <strong>Forwarded for Review:</strong>{" "}
               {new Date(task.reviewTime).toLocaleString()}
             </p>
           )}
           {task.completionTime && (
             <p>
-              <strong>Completed:</strong>{" "}
+              <strong>Completed at:</strong>{" "}
               {new Date(task.completionTime).toLocaleString()}
             </p>
           )}
@@ -64,11 +92,23 @@ export default function ViewTask({ task, onCloseTab, onAddComment }) {
           <h3>Comments</h3>
           <div className={styles.commentsSection}>
             {task.comments && task.comments.length > 0 ? (
-              task.comments.map((comment, index) => (
-                <div key={index} className={styles.comment}>
-                  {comment}
-                </div>
-              ))
+              task.comments.map((comment, index) => {
+                const commentUser = allUsers.find(
+                  (u) => u._id === comment.user
+                );
+                const commenterName = commentUser
+                  ? commentUser.name
+                  : "Unknown User";
+                return (
+                  <div key={index} className={styles.comment}>
+                    <p>
+                      <strong>{commenterName}</strong> &middot;{" "}
+                      <em>{new Date(comment.time).toLocaleString()}</em>
+                    </p>
+                    <p>{comment.text}</p>
+                  </div>
+                );
+              })
             ) : (
               <p>No comments yet.</p>
             )}
@@ -82,6 +122,35 @@ export default function ViewTask({ task, onCloseTab, onAddComment }) {
               onChange={(e) => setNewComment(e.target.value)}
             />
             <button onClick={handleAddComment}>Add Comment</button>
+            {/* ✅ Status History Display */}
+            <hr />
+            <h3>Status History</h3>
+            {task.statusHistory && task.statusHistory.length > 0 ? (
+              <ul className={styles.statusHistory}>
+                {task.statusHistory.map((entry, index) => {
+                  const user = allUsers.find((u) => u._id === entry.user);
+                  const userName = user ? user.name : "Unknown User";
+                  const timestamp = new Date(entry.timestamp).toLocaleString();
+
+                  return (
+                    <li key={index}>
+                      {index === 0 ? (
+                        <>
+                          Created by <strong>{userName}</strong> at {timestamp}
+                        </>
+                      ) : (
+                        <>
+                          Moved to <strong>{entry.status}</strong> by{" "}
+                          <strong>{userName}</strong> at {timestamp}
+                        </>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p>No status changes yet.</p>
+            )}
           </div>
         </div>
       </div>

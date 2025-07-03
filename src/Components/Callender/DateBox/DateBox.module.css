@@ -1,0 +1,28 @@
+.dateBox {
+  background: linear-gradient(150deg, rgb(0, 0, 143), #201f32);
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  min-width: 70px;
+}
+
+.dateBox p {
+  color: #d9f275;
+  font-size: 12px;
+  text-align: center;
+}
+
+.dateBox h3 {
+  color: aliceblue;
+  display: flex;
+  justify-content: center;
+  padding: 5px 2px;
+}
+
+.selected {
+  background: linear-gradient(150deg, rgb(17, 17, 213), #37356e);
+  color: white;
+  border-radius: 6px;
+}

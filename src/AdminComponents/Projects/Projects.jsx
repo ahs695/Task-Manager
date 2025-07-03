@@ -3,21 +3,24 @@ import styles from "./Projects.module.css";
 import CreateProject from "./CreateProject/CreateProject";
 import ProjectFilter from "./ProjectFilter/ProjectFilter";
 import axios from "axios";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchAllProjects } from "../../Redux/Projects/projectAPI";
+import { hasPermission } from "../../App/Utility/permission";
 
-export default function Projects({
-  allProjects,
-  fetchProjects,
-  allUsers,
-  allTasks,
-  taskAssignments,
-}) {
+export default function Projects() {
+  const permissions = useSelector((state) => state.auth.permissions);
+  const dispatch = useDispatch();
+  const allProjects = useSelector((state) => state.projects.allProjects);
+  const taskAssignments = useSelector(
+    (state) => state.taskAssignments.assignments
+  );
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [editProject, setEditProject] = useState(null); // holds project to edit
+  const [editProject, setEditProject] = useState(null);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [filteredProjects, setFilteredProjects] = useState(allProjects);
 
   useEffect(() => {
-    setFilteredProjects(allProjects); // keep it fresh if props change
+    setFilteredProjects(allProjects);
   }, [allProjects]);
 
   const handleDelete = async (projectId) => {
@@ -38,7 +41,7 @@ export default function Projects({
     try {
       await axios.delete(`http://localhost:5000/api/projects/${projectId}`);
       alert("Project deleted successfully.");
-      fetchProjects(); // refresh project list
+      dispatch(fetchAllProjects()); // refresh project list
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.message || "Failed to delete project");
@@ -52,7 +55,7 @@ export default function Projects({
 
   const handleCloseModal = () => {
     setShowCreateModal(false);
-    setEditProject(null); // reset after closing
+    setEditProject(null);
   };
 
   return (
@@ -71,6 +74,10 @@ export default function Projects({
           <button
             className={styles.projectOption}
             onClick={() => {
+              if (!hasPermission(permissions, "Project", "create")) {
+                alert("You do not have permission to create a project.");
+                return;
+              }
               setEditProject(null);
               setShowCreateModal(true);
             }}
@@ -103,14 +110,26 @@ export default function Projects({
               <td>
                 <img
                   className={styles.edImg}
-                  onClick={() => openEditModal(project)}
+                  onClick={() => {
+                    if (!hasPermission(permissions, "Project", "edit")) {
+                      alert("You do not have permission to edit a project.");
+                      return;
+                    }
+                    openEditModal(project);
+                  }}
                   title="Edit"
                   src="/edit.png"
                   alt=""
                 />
 
                 <img
-                  onClick={() => handleDelete(project._id)}
+                  onClick={() => {
+                    if (!hasPermission(permissions, "Project", "delete")) {
+                      alert("You do not have permission to delete a project.");
+                      return;
+                    }
+                    handleDelete(project._id);
+                  }}
                   src="/delete.png"
                   alt=""
                 />
@@ -123,15 +142,11 @@ export default function Projects({
       {showCreateModal && (
         <CreateProject
           onCloseTab={handleCloseModal}
-          fetchProjects={fetchProjects}
           existingProject={editProject}
         />
       )}
       {showFilterModal && (
         <ProjectFilter
-          allProjects={allProjects}
-          taskAssignments={taskAssignments}
-          allUsers={allUsers}
           setFilteredProjects={setFilteredProjects}
           onCloseTab={() => setShowFilterModal(false)}
         />

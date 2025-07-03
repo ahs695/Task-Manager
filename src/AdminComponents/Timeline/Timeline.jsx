@@ -1,9 +1,10 @@
 import React from "react";
 import Chart from "react-apexcharts";
 import styles from "./Timeline.module.css";
+import { useSelector, useDispatch } from "react-redux";
 
-export default function Timeline({ allTasks }) {
-  // Initialize arrays for all three ranges
+export default function Timeline() {
+  const allTasks = useSelector((state) => state.tasks.allTasks);
   const createdToStarted = [];
   const startedToReview = [];
   const reviewToCompleted = [];
