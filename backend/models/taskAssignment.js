@@ -13,6 +13,11 @@ const TaskAssignmentSchema = new mongoose.Schema({
     required: true,
   },
   assignedAt: { type: Date, default: Date.now },
+  organization: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Organization",
+    required: false,
+  },
 });
 
 module.exports = mongoose.model("TaskAssignment", TaskAssignmentSchema);

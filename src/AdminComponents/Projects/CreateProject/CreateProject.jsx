@@ -3,6 +3,7 @@ import axios from "axios";
 import styles from "./CreateProject.module.css";
 import { useDispatch } from "react-redux";
 import { fetchAllProjects } from "../../../Redux/Projects/projectAPI";
+import { useSelector } from "react-redux";
 export default function CreateProject({
   onCloseTab,
 
@@ -10,8 +11,16 @@ export default function CreateProject({
 }) {
   const dispatch = useDispatch();
   const [projectName, setProjectName] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedOrg, setSelectedOrg] = useState("");
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const allOrganizations = useSelector(
+    (state) => state.organizations.allOrganizations
+  );
+  {
+    console.log(allOrganizations);
+  }
+  const { role, organization } = useSelector((state) => state.auth);
   useEffect(() => {
     if (existingProject) {
       setProjectName(existingProject.projectName);
@@ -42,7 +51,9 @@ export default function CreateProject({
       } else {
         await axios.post("http://localhost:5000/api/projects", {
           projectName,
+          organization: organization?.id || selectedOrg, // attach logged-in org or selected org
         });
+
         alert("Project created successfully!");
       }
 
@@ -101,6 +112,24 @@ export default function CreateProject({
               required
             />
           </label>
+
+          {!organization && (
+            <label>
+              Select Organization:
+              <select
+                value={selectedOrg}
+                onChange={(e) => setSelectedOrg(e.target.value)}
+                required
+              >
+                <option value="">-- Select --</option>
+                {allOrganizations.map((org) => (
+                  <option key={org._id} value={org._id}>
+                    {org.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
 
           <button type="submit" disabled={isSubmitting}>
             {existingProject ? "Update Project Name" : "Create Project"}

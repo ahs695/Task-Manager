@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 const Task = require("../models/task");
 const TaskAssignment = require("../models/taskAssignment");
+const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 
-// GET all tasks
 router.get("/", async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
@@ -13,9 +13,19 @@ router.get("/", async (req, res) => {
 
     let tasks;
 
-    if (["admin", "superAdmin"].includes(decoded.role)) {
+    if (decoded.role === "superAdmin") {
+      // 1. Super Admin: all tasks
       tasks = await Task.find();
+    } else if (["admin", "organization"].includes(decoded.role)) {
+      // 2. Admin or Org: tasks with same org as requesting user
+      const user = await User.findById(decoded.id);
+      if (!user.organization) {
+        return res.status(403).json({ message: "Organization not assigned" });
+      }
+
+      tasks = await Task.find({ organization: user.organization });
     } else {
+      // 3. Other roles: only tasks assigned to self
       const assignments = await TaskAssignment.find({ userId: decoded.id });
       const taskIds = assignments.map((a) => a.taskId);
       tasks = await Task.find({ _id: { $in: taskIds } });
@@ -23,6 +33,7 @@ router.get("/", async (req, res) => {
 
     res.json(tasks);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -36,8 +47,21 @@ router.post("/", async (req, res) => {
 
     const taskData = req.body;
 
+    let organization = null;
+
+    if (decoded.role !== "superAdmin") {
+      const requestingUser = await User.findById(decoded.id);
+      if (!requestingUser || !requestingUser.organization) {
+        return res
+          .status(400)
+          .json({ message: "User must belong to an organization" });
+      }
+      organization = requestingUser.organization;
+    }
+
     const newTask = new Task({
       ...taskData,
+      organization, // set org here
       statusHistory: [
         {
           status: taskData.category || "todo",
@@ -63,7 +87,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-// PUT update task and statusHistory
 router.put("/:id", async (req, res) => {
   try {
     const taskId = req.params.id;
@@ -81,7 +104,6 @@ router.put("/:id", async (req, res) => {
     const updateFields = {};
     const updateOps = {};
 
-    // Category/status update
     const categoryChanged =
       taskData.category && taskData.category !== existingTask.category;
     if (categoryChanged) {
@@ -95,7 +117,6 @@ router.put("/:id", async (req, res) => {
       };
     }
 
-    // Append to comments if provided
     if (taskData.comments && Array.isArray(taskData.comments)) {
       const newComment = taskData.comments[taskData.comments.length - 1];
       if (newComment) {
@@ -106,7 +127,6 @@ router.put("/:id", async (req, res) => {
       }
     }
 
-    // Other direct updates
     if (taskData.title) updateFields.title = taskData.title;
     if (taskData.description) updateFields.description = taskData.description;
     if (taskData.dueDate) updateFields.dueDate = taskData.dueDate;

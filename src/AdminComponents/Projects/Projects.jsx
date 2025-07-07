@@ -18,6 +18,9 @@ export default function Projects() {
   const [editProject, setEditProject] = useState(null);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [filteredProjects, setFilteredProjects] = useState(allProjects);
+  const allOrganizations = useSelector(
+    (state) => state.organizations.allOrganizations
+  );
 
   useEffect(() => {
     setFilteredProjects(allProjects);
@@ -57,6 +60,7 @@ export default function Projects() {
     setShowCreateModal(false);
     setEditProject(null);
   };
+  const role = useSelector((state) => state.auth.role);
 
   return (
     <div className={styles.projects}>
@@ -80,6 +84,9 @@ export default function Projects() {
               }
               setEditProject(null);
               setShowCreateModal(true);
+              {
+                console.log(allOrganizations);
+              }
             }}
           >
             <img src="/add-userab.png" alt="Create" />
@@ -94,9 +101,11 @@ export default function Projects() {
             <th>Project Name</th>
             <th>Created</th>
             <th>Completed</th>
+            {role === "superAdmin" && <th>Organization</th>}
             <th>Actions</th>
           </tr>
         </thead>
+
         <tbody>
           {filteredProjects.map((project) => (
             <tr key={project._id}>
@@ -107,6 +116,9 @@ export default function Projects() {
                   ? new Date(project.completionTime).toLocaleDateString()
                   : "In Progress"}
               </td>
+              {role === "superAdmin" && (
+                <td>{project.organization?.name || "N/A"}</td>
+              )}
               <td>
                 <img
                   className={styles.edImg}
@@ -119,9 +131,8 @@ export default function Projects() {
                   }}
                   title="Edit"
                   src="/edit.png"
-                  alt=""
+                  alt="Edit"
                 />
-
                 <img
                   onClick={() => {
                     if (!hasPermission(permissions, "Project", "delete")) {
@@ -131,7 +142,7 @@ export default function Projects() {
                     handleDelete(project._id);
                   }}
                   src="/delete.png"
-                  alt=""
+                  alt="Delete"
                 />
               </td>
             </tr>

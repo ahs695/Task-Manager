@@ -10,11 +10,13 @@ import Timeline from "../Timeline/Timeline";
 import Projects from "../Projects/Projects";
 import User from "../User/User";
 import MySettings from "../SettingsPage/MySettings";
+import Organization from "../Organization/Organization";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllTasks } from "../../Redux/Tasks/taskAPI";
 import { fetchAllProjects } from "../../Redux/Projects/projectAPI";
 import { fetchAllUsers } from "../../Redux/Users/userAPI";
 import { fetchTaskAssignments } from "../../Redux/TaskAssignments/taskAssignmentAPI";
+import { fetchUnassignedUsers } from "../../Redux/Users/userAPI";
 import React, { useState, useEffect } from "react";
 import ProtectedRoute from "../../App/Utility/ProtectedRoute";
 
@@ -27,6 +29,7 @@ function Dashboard() {
     dispatch(fetchAllProjects());
     dispatch(fetchAllUsers());
     dispatch(fetchTaskAssignments());
+    dispatch(fetchUnassignedUsers());
   }, [dispatch]);
 
   const toDoTasks = allTasks.filter((task) => task.category === "todo");
@@ -106,6 +109,7 @@ function Dashboard() {
           }
         />
         <Route path="settings" element={<MySettings />} />
+        <Route path="organizations" element={<Organization />} />
         <Route
           path="org-settings"
           element={

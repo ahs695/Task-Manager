@@ -25,6 +25,11 @@ const taskSchema = new mongoose.Schema({
     ],
     default: [],
   },
+  organization: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Organization",
+    required: false,
+  },
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
   project: {
     type: mongoose.Schema.Types.ObjectId,

@@ -1,9 +1,7 @@
-// routes/roles.js
 const express = require("express");
 const router = express.Router();
 const Role = require("../models/role");
 
-// GET all roles and their permissions
 router.get("/", async (req, res) => {
   try {
     const roles = await Role.find();
@@ -14,7 +12,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// routes/roles.js (continued)
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const { permissions } = req.body;

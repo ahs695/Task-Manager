@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import styles from "./User.module.css";
 import FilterUser from "./FilterUser/FilterUser";
 import CreateOrEditUser from "./CreateUser/CreateOrEditUser";
+import AddTeam from "./AddTeam/AddTeam";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchAllUsers } from "../../Redux/Users/userAPI";
 import { hasPermission } from "../../App/Utility/permission";
@@ -10,14 +11,17 @@ export default function User() {
   const permissions = useSelector((state) => state.auth.permissions);
   const dispatch = useDispatch();
   const allUsers = useSelector((state) => state.users.allUsers);
+  const { unassignedUsers, unassignedStatus, unassignedError } = useSelector(
+    (state) => state.users
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [userModalMode, setUserModalMode] = useState("");
+  const [showAddTeamModal, setShowAddTeamModal] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [filteredUsers, setFilteredUsers] = useState(allUsers);
   const [editUser, setEditUser] = useState(null);
   const auth = useSelector((state) => state.auth);
-  const [userModalMode, setUserModalMode] = useState("create");
-
   const handleDelete = async (userId) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
 
@@ -52,6 +56,8 @@ export default function User() {
     setFilteredUsers(searched);
   }, [searchQuery, allUsers]);
 
+  const role = useSelector((state) => state.auth.role);
+  const shouldAddtoTeam = role === "organization";
   return (
     <div className={styles.user}>
       <div className={styles.userTop}>
@@ -90,6 +96,23 @@ export default function User() {
             <img src="/add-userab.png" alt="Create" />
             Create
           </button>
+
+          {shouldAddtoTeam && (
+            <button
+              className={styles.userOption}
+              onClick={() => {
+                if (!hasPermission(permissions, "user", "create")) {
+                  alert("You do not have permission to add users.");
+                  return;
+                }
+
+                setShowAddTeamModal(true);
+              }}
+            >
+              <img src="/add-userab.png" alt="Create" />
+              Add to Team
+            </button>
+          )}
         </div>
       </div>
 
@@ -99,6 +122,7 @@ export default function User() {
             <th>Name</th>
             <th>Email</th>
             <th>Role</th>
+            {role === "superAdmin" && <th>Organization</th>}
             <th>Actions</th>
           </tr>
         </thead>
@@ -108,6 +132,18 @@ export default function User() {
               <td>{user.name}</td>
               <td>{user.email}</td>
               <td>{user.role?.rolename || "N/A"}</td>
+              {role === "superAdmin" && (
+                <td>
+                  {user.organization?.name
+                    ? user.organization.name
+                    : user.organizations && user.organizations.length > 0
+                    ? user.organizations
+                        .map((org) => org?.name)
+                        .filter(Boolean)
+                        .join(", ")
+                    : "N/A"}
+                </td>
+              )}
               <td>
                 <img
                   className={styles.edImg}
@@ -151,6 +187,13 @@ export default function User() {
             setEditUser(null);
           }}
           editUser={editUser}
+        />
+      )}
+      {showAddTeamModal && (
+        <AddTeam
+          onCloseTab={() => {
+            setShowAddTeamModal(false);
+          }}
         />
       )}
 

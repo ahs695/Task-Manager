@@ -19,7 +19,7 @@ const initialState = {
   token: initialToken || null,
   role: decoded?.role || null,
   permissions: decoded?.permissions || [],
-
+  organization: decoded?.organization || null,
   status: "idle",
   error: null,
 };
@@ -40,6 +40,7 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.role = action.payload.role;
         state.permissions = action.payload.permissions;
+        state.organization = action.payload.organization;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.status = "failed";
@@ -51,6 +52,7 @@ const authSlice = createSlice({
         state.role = null;
         state.status = "idle";
         state.error = null;
+        state.organization = null;
         state.permissions = [];
       });
   },

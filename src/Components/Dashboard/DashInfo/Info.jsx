@@ -18,7 +18,7 @@ export default function Info({
   const { token } = useSelector((state) => state.auth);
   const allUsers = useSelector((state) => state.users.allUsers);
 
-  let name = "Admin";
+  let name = "User";
 
   if (token) {
     try {

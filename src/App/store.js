@@ -4,6 +4,7 @@ import projectsReducer from "../Redux/Projects/projectSlice";
 import usersReducer from "../Redux/Users/userSlice";
 import authReducer from "../Redux/Auth/authSlice";
 import taskAssignmentReducer from "../Redux/TaskAssignments/taskAssignmentSlice";
+import organizationReducer from "../Redux/Organizations/OrganizationSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     projects: projectsReducer,
     users: usersReducer,
     taskAssignments: taskAssignmentReducer,
+    organizations: organizationReducer,
   },
 });
 

@@ -4,13 +4,20 @@ import styles from "./Sidebar.module.css";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { logoutUser } from "../../Redux/Auth/authAPI";
+import { useSelector } from "react-redux";
+import { jwtDecode } from "jwt-decode";
 
 export default function Sidebar() {
+  const auth = useSelector((state) => state.auth);
+  const decoded = jwtDecode(auth.token);
+  const role = decoded.role;
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showEntitiesDropdown, setShowEntitiesDropdown] = useState(false);
   const [showSettingDropdown, setShowSettingDropdown] = useState(false);
+
+  const shouldShowOrg = role === "superAdmin";
 
   const handleLogout = async () => {
     dispatch(logoutUser()).then(() => {
@@ -122,6 +129,20 @@ export default function Sidebar() {
               <img src="/mytasksdb.png" alt="tasks" />
               All Tasks
             </NavLink>
+
+            {shouldShowOrg && (
+              <NavLink
+                to="/admin-dashboard/organizations"
+                className={({ isActive }) =>
+                  isActive
+                    ? `${styles.navButton} ${styles.navButtonActive}`
+                    : styles.navButton
+                }
+              >
+                <img src="/workplace.png" alt="users" />
+                Organizations
+              </NavLink>
+            )}
 
             <NavLink
               to="/admin-dashboard/projects"

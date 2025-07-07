@@ -4,31 +4,60 @@ import axios from "axios";
 import styles from "./Register.module.css";
 
 function Register() {
+  const [isOrgMode, setIsOrgMode] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+
   const [data, setData] = useState({
     name: "",
     email: "",
     password: "",
   });
-  const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
+  const handleToggle = () => {
+    setIsOrgMode((prev) => !prev);
+    setData({ name: "", email: "", password: "" }); // reset on toggle
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
-        data
-      );
 
-      if (response.status === 201) {
-        alert("Registration successful!");
-        navigate("/login");
+    if (!data.name.trim() || !data.email.trim() || !data.password.trim()) {
+      alert("All fields are required.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      if (isOrgMode) {
+        // Register organization
+        await axios.post("http://localhost:5000/api/organizations", {
+          orgName: data.name,
+          email: data.email,
+          password: data.password,
+        });
+        alert("Organization created successfully!");
+      } else {
+        // Register user
+        const res = await axios.post(
+          "http://localhost:5000/api/auth/register",
+          data
+        );
+        if (res.status === 201) {
+          alert("User registered successfully!");
+        }
       }
+
+      navigate("/login");
     } catch (err) {
       console.error(err);
       alert(
         err.response?.data?.message ||
-          "Registration failed. Try again with a different email."
+          "Registration failed. Try again with different credentials."
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -39,41 +68,69 @@ function Register() {
 
         <div className={styles.registerMessage}>
           <h2>Welcome!</h2>
-          <h3>REGISTER YOUR AACCOUNT</h3>
+          <h3>
+            {isOrgMode ? "REGISTER ORGANIZATION" : "REGISTER YOUR ACCOUNT"}
+          </h3>
         </div>
-        <form className={styles.registerForm} onSubmit={handleRegister}>
-          <label>Enter your Full Name:</label>
+
+        <form className={styles.registerForm} onSubmit={handleSubmit}>
+          <label>
+            {isOrgMode ? "Organization Name:" : "Enter your Full Name:"}
+          </label>
           <input
             type="text"
-            placeholder="Full-Name"
+            placeholder={isOrgMode ? "Org Name" : "Full Name"}
             value={data.name}
             onChange={(e) => setData({ ...data, name: e.target.value })}
           />
           <br />
           <br />
-          <label>Enter your Email Address:</label>
+
+          <label>
+            {isOrgMode ? "Org ID (Email):" : "Enter your Email Address:"}
+          </label>
           <input
             type="email"
-            name="email"
             placeholder="abc@xyz.com"
             value={data.email}
             onChange={(e) => setData({ ...data, email: e.target.value })}
           />
           <br />
           <br />
-          <label for="r_password">Create your Password:</label>
+
+          <label>
+            {isOrgMode ? "Create Org Admin Password:" : "Create your Password:"}
+          </label>
           <input
             type="password"
-            id="r_password"
-            name="pass"
             placeholder="Enter Password"
             value={data.password}
             onChange={(e) => setData({ ...data, password: e.target.value })}
           />
           <br />
           <br />
-          <button class={styles.registerButton}>Register</button>
+
+          <button
+            type="submit"
+            className={styles.registerButton}
+            disabled={isSubmitting}
+          >
+            {isOrgMode ? "Register Organization" : "Register"}
+          </button>
         </form>
+
+        <p style={{ marginTop: "1rem", color: "black" }}>
+          {isOrgMode
+            ? "Want to register as a user?"
+            : "Want to register an organization?"}{" "}
+          <button
+            type="button"
+            onClick={handleToggle}
+            className={styles.toggleButton}
+          >
+            Click here
+          </button>
+        </p>
       </div>
     </div>
   );

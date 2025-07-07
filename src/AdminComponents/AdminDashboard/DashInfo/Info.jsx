@@ -33,7 +33,8 @@ export default function Info({
   }
 
   // Check if role is admin or superAdmin
-  const shouldShowCards = role === "admin" || role === "superAdmin";
+  const shouldShowCards =
+    role === "admin" || role === "superAdmin" || role === "organization";
 
   return (
     <div className={styles.dashboard}>

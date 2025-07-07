@@ -3,36 +3,53 @@ const router = express.Router();
 const Project = require("../models/project");
 const TaskAssignment = require("../models/taskAssignment");
 const jwt = require("jsonwebtoken");
+const User = require("../models/user");
 
-// Create Project
 router.post("/", async (req, res) => {
   try {
-    const { projectName } = req.body;
+    const { projectName, organization } = req.body;
 
-    const newProject = new Project({ projectName });
+    if (!projectName) {
+      return res.status(400).json({ message: "Project name is required." });
+    }
+
+    const newProject = new Project({ projectName, organization });
     const savedProject = await newProject.save();
+
     res.status(201).json(savedProject);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// Get All Projects
-// Get All Projects (filtered by user assignments if not admin/superAdmin)
 router.get("/", async (req, res) => {
   try {
-    const userId = req.query.userId;
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    const role = decoded.role;
+    const userId = decoded.id;
+
     let projects;
 
-    if (["admin", "superAdmin"].includes(decoded.role)) {
-      // Admins get all projects
-      projects = await Project.find().sort({ creationTime: -1 });
+    if (role === "superAdmin") {
+      // All projects, all organizations
+      projects = await Project.find()
+        .populate("organization")
+        .sort({ creationTime: -1 });
+    } else if (role === "admin" || role === "organization") {
+      // Projects within their own organization
+      const user = await User.findById(userId);
+      if (!user.organization)
+        return res.status(403).json({ message: "Organization not assigned" });
+
+      projects = await Project.find({ organization: user.organization })
+        .populate("organization")
+        .sort({ creationTime: -1 });
     } else {
-      // Regular users get only projects they have tasks assigned to
+      // Regular user: get assigned projects only
       const assignments = await TaskAssignment.find({ userId: decoded.id });
       const projectIds = [
         ...new Set(assignments.map((a) => a.projectId.toString())),
@@ -40,7 +57,9 @@ router.get("/", async (req, res) => {
 
       projects = await Project.find({
         _id: { $in: projectIds },
-      }).sort({ creationTime: -1 });
+      })
+        .populate("organization")
+        .sort({ creationTime: -1 });
     }
 
     res.json(projects);

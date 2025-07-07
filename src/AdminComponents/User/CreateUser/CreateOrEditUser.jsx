@@ -22,6 +22,7 @@ export default function CreateOrEditUser({
     email: editUser?.email || "",
     password: "",
     confirmPassword: "",
+    organization: editUser?.organization || "",
   });
 
   const [showPasswordFields, setShowPasswordFields] = useState(false);
@@ -29,6 +30,10 @@ export default function CreateOrEditUser({
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+
+  const allOrganizations = useSelector(
+    (state) => state.organizations.allOrganizations
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -84,6 +89,10 @@ export default function CreateOrEditUser({
             role: selectedRole,
             email: form.email,
             password: form.password,
+            // 👇 Include organization only if superAdmin
+            ...(auth.role === "superAdmin"
+              ? { organization: form.organization }
+              : {}),
           },
           {
             headers: {
@@ -91,6 +100,7 @@ export default function CreateOrEditUser({
             },
           }
         );
+
         alert("User created successfully!");
       } else if (isEditMode) {
         await axios.put(
@@ -117,8 +127,8 @@ export default function CreateOrEditUser({
   };
 
   const roleOptions =
-    auth.role === "superAdmin"
-      ? ["superAdmin", "admin", "staff", "user", "custom"]
+    auth.role === "superAdmin" || "organization"
+      ? ["admin", "staff", "user", "custom"]
       : ["staff", "user", "custom"];
 
   const [closing, setClosing] = useState(false);
@@ -177,6 +187,25 @@ export default function CreateOrEditUser({
                   required
                 />
               </label>
+
+              {auth.role === "superAdmin" && (
+                <label>
+                  Organization:
+                  <select
+                    name="organization"
+                    value={form.organization}
+                    onChange={handleChange}
+                    required={isCreateMode}
+                  >
+                    <option value="">-- Select Organization --</option>
+                    {allOrganizations.map((org) => (
+                      <option key={org._id} value={org._id}>
+                        {org.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
 
               <label>
                 Role:

@@ -11,7 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 const seedInitialData = async () => {
-  const defaultRoles = ["superAdmin", "admin", "staff"];
+  const defaultRoles = ["superAdmin", "admin", "staff", "organization"];
   const roleMap = {};
   const allResources = [
     "Dashboard",
@@ -79,12 +79,14 @@ const taskRoutes = require("./routes/taskRoutes");
 const projectRoutes = require("./routes/projectRoutes");
 const taskAssignmentRoutes = require("./routes/taskAssignments");
 const roleRoutes = require("./routes/roleRoutes");
+const orgRoutes = require("./routes/orgRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/task-assignments", taskAssignmentRoutes);
 app.use("/api/roles", roleRoutes);
+app.use("/api/organizations", orgRoutes);
 
 app.get("/", (req, res) => {
   res.send("API running");

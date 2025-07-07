@@ -17,6 +17,11 @@ const RoleSchema = new mongoose.Schema({
     default: "user",
   },
   permissions: [PermissionSchema],
+  organization: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Organization",
+    required: false, // Only needed for custom org-level roles
+  },
   createdAt: {
     type: Date,
     default: Date.now,

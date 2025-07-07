@@ -36,7 +36,7 @@
 }
 
 .registerButton {
-  width: 200px;
+  width: fit-content;
   background-color: #201f32;
   color: white;
   border-radius: 8px;
@@ -46,4 +46,10 @@
   font-size: large;
   display: flex;
   justify-content: center;
+}
+
+.toggleButton {
+  background: none;
+  border: none;
+  color: #201f32;
 }

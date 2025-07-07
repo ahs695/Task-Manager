@@ -54,7 +54,9 @@ function AppContent() {
         {/* Protected Route for admins */}
         <Route
           element={
-            <ProtectedRoute allowedRoles={["admin", "superAdmin", "staff"]} />
+            <ProtectedRoute
+              allowedRoles={["admin", "superAdmin", "staff", "organization"]}
+            />
           }
         >
           <Route path="/admin-dashboard/*" element={<AdminDashboard />} />

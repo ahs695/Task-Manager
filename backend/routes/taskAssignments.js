@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const TaskAssignment = require("../models/taskAssignment");
 
-// GET all task assignments
 router.get("/", async (req, res) => {
   try {
     const assignments = await TaskAssignment.find().populate(
